@@ -19,3 +19,5 @@ export async function GET(ignored: unknown, context: ResponseContext) { // conte
         return NextResponse.json({message: "failed to read an item"});
     }
 }
+
+export default ResponseContext; // FIXME move it to more appropriate place
