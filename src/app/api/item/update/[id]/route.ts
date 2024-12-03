@@ -8,9 +8,17 @@ export async function PUT(request: NextRequest, context: ResponseContext) {
     try {
         await connectDB();
         const params = await context.params;
+        const pristineItem = await ItemModel.findById(params.id);
+
+        if (!pristineItem || pristineItem.email !== reqBody.email) {
+            // this deceptively says the item is there when the given id is wrong. 
+            return NextResponse.json({message: "You don't have privilege to update the item"});
+        }
+
         await ItemModel.updateOne({_id: params.id}, reqBody);
-        return NextResponse.json({message: "updated an item successfully"});
+        return NextResponse.json({message: "updated the item successfully"});
     } catch (err) {
-        return NextResponse.json({message: "failed to update an item successfully"});
+        console.error(err);
+        return NextResponse.json({message: "failed to update the item"});
     }
 }

@@ -5,6 +5,7 @@ import Config from "./app/utlis/config";
 const delimiter = " ";
 
 export async function middleware(request: NextRequest) {
+    // expecting Authorization header with a value like "ignored lengthyTokenBlahBlahBlahBlahBlah" (there is a space)
     const token = await request.headers.get("Authorization")?.split(delimiter)[1]; // TODO my editor insists the await word doesn't have any effects
 
     if (!token) {
