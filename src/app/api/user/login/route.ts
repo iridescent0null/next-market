@@ -4,16 +4,26 @@ import { UserModel } from "@/app/utlis/schemaModels";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
 import Config from "@/app/utlis/config";
+import { UserInput } from "../register/route";
+
+type NullableRetrievedUser = {
+    name: string,
+    email: string,
+    password: string, //hashed
+    salt: string
+} | null;
 
 const failureMessage = {message: "failed to sign in"};
 
 export async function POST(request: NextRequest) {
-    const userInput = await request.json();
     try {
+        const userInput: UserInput = await request.json();
         await connectDB();
-        const registeredUser = await UserModel.findOne({email: userInput.email}); //FIXME any
+        
+        const registeredUser: NullableRetrievedUser = await UserModel.findOne({email: userInput.email});
 
         if (!registeredUser) {
+            console.warn("login attempt with unknown email address: " + userInput.email);
             return NextResponse.json(failureMessage);
         }
 

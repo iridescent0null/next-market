@@ -19,7 +19,7 @@ interface UserForInsertion {
 /**
  * Hash the password input to save it into the DB
  * @param user user information having a plain password
- * @returns the object of which password was hashed and added the used salt
+ * @returns the object of which password was hashed with the used salt
  */
 const makeStorableIntoDB = async (user: UserInput) => {
     let rtnValue: UserForInsertion;
@@ -52,3 +52,5 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({message: "failed to registered a user"});
     }
 }
+
+export type { UserInput };

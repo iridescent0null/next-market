@@ -1,4 +1,4 @@
-import { NextRequest,NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/app/utlis/database";
 import { ItemModel } from "@/app/utlis/schemaModels";
 import ResponseContext from "../../readsingle/[id]/route";
