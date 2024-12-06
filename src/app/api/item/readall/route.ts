@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/app/utlis/database"; // suggested in the different form in the Miyoshi's text
 import { ItemModel } from "@/app/utlis/schemaModels";
-import { Item } from "../readsingle/[id]/route";
+import { Item } from "../[id]/route";
 
 interface AllItemsMessage {
     message: string,

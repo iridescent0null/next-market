@@ -1,10 +1,10 @@
-import ResponseContext from "@/app/api/item/readsingle/[id]/route";
+import ResponseContext from "@/app/api/item/[id]/route";
 import { getRootURL } from "@/app/utlis/config";
-import { Item, ItemMessage } from "@/app/api/item/readsingle/[id]/route";
+import { Item, ItemMessage } from "@/app/api/item/[id]/route";
 import Image from "next/image";
 
 const getItem = async (id: string) => {
-    return fetch(`${getRootURL()}/api/item/readsingle/${id}`)
+    return fetch(`${getRootURL()}/api/item/${id}`)
         .then(res => res.json())
         .catch(err => {console.error(err)});
 };

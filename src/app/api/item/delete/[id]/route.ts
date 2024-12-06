@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import connectDB from "@/app/utlis/database";
 import { ItemModel } from "@/app/utlis/schemaModels";
-import ResponseContext from "../../readsingle/[id]/route";
+import ResponseContext from "../../[id]/route";
 
 export async function DELETE(request: NextRequest, context: ResponseContext) {
     const reqBody = await request.json();
