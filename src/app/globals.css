@@ -1,3 +1,21 @@
 .greeting {
-  color: cyan;
+  color: honeydew
+}
+
+.item .img-wrapper {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.item div, h3 {
+  margin-left: 25px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.item {
+  margin: 20px;
+  background-color: darkorange;
+  border-radius: 20px;
 }
