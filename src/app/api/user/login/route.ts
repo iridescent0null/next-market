@@ -9,11 +9,22 @@ import { UserInput } from "../register/route";
 type NullableRetrievedUser = {
     name: string,
     email: string,
-    password: string, //hashed
+    password: string, // hashed
     salt: string
 } | null;
 
-const failureMessage = {message: "failed to sign in"};
+/**
+ * falsy token means failure in the signing in 
+ */
+interface LoginResultMessage {
+    message: string,
+    token: string | undefined 
+}
+
+const failureMessage: LoginResultMessage = {
+    message: "failed to sign in",
+    token: undefined 
+};
 
 export async function POST(request: NextRequest) {
     try {
@@ -45,6 +56,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({message: "signed in successfully", token: token});  
     } catch (err) {
         console.error(err);
-        return NextResponse.json({message: "error in signing in"});
+        return NextResponse.json({message: "error in signing in", token: undefined});
     }
 }
+
+export type { LoginResultMessage };

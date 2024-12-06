@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 const Register = () => {
     
@@ -7,11 +7,9 @@ const Register = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    console.log(name);
-
-    const handleSubmit = (e: SubmitEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        fetch("../../api/user/register",{
+        const response = await fetch("../../api/user/register", {
             method: "POST",
             headers:{
                 "Accept": "application/json",
@@ -27,7 +25,13 @@ const Register = () => {
             console.error(err);
             alert("failed to register you");
         });
-        console.log("registered");
+
+        if (response) {
+            const json = await response.json();
+            console.log("registered: " + json.message);
+            return;
+        }
+        console.log("registered, but no response was returned");
     };
 
     return (
