@@ -1,6 +1,7 @@
 import { AllItemsMessage } from "./api/item/readall/route";
 import Image from "next/image";
 import { getRootURL } from "./utlis/config";
+import Link from "next/link";
 
 const getAllItems = async () => {
   return fetch(`${getRootURL()}api/item/readall`)
@@ -21,17 +22,19 @@ const ReadAllItems = async () => {
       {!items? "":
         items.map(item => {
           return <div key={item._id} className="item">
-            <h3>{item.title}</h3>
-            <h3>{"$"+item.price}</h3>
-            <div>{item.description}</div>
-            <div className="img-wrapper">
-              <Image src={item.image} fill={true} alt={"image"}/>
-            </div>
+            <Link href={`/item/${item._id}`}>
+              <h3>{item.title}</h3>
+              <h3>{"$"+item.price}</h3>
+              <div>{item.description}</div>
+              <div className="img-wrapper">
+                <Image src={item.image} fill={true} alt={"image"}/>
+              </div>
+            </Link>
           </div>
         })
       }
     </>
-  )
+  );
 };
 
 export default ReadAllItems;
