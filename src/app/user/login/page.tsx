@@ -37,6 +37,7 @@ const Login = () => {
         }
 
         localStorage.setItem("token", json.token);
+        localStorage.setItem("email", email);
         alert("signed in successfully");
         // TODO redirect
     }
@@ -46,7 +47,7 @@ const Login = () => {
             <h1>Sign in</h1>
             <form onSubmit={handleSubmit}>
                 <input type="text" name="email" onChange={(e) => setEmail(e.target.value)} placeholder="your e-mail address" required/>
-                <input type="text" name="password" onChange={(e) => setPlainPassword(e.target.value)}  placeholder="your password" required />
+                <input type="password" name="password" onChange={(e) => setPlainPassword(e.target.value)}  placeholder="your password" required />
                 <button>Sign in</button>
             </form>
         </>
