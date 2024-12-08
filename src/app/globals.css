@@ -24,3 +24,11 @@
   color: white;
   text-decoration: none; 
 }
+
+.disabled-button {
+  background-color: gray;
+}
+
+.warning-message {
+  color: brown;
+}

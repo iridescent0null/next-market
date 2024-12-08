@@ -1,5 +1,4 @@
 "use client"
-import { ItemMessage } from "@/app/api/item/[id]/route";
 import { getRootURL } from "@/app/utlis/config";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,10 +16,10 @@ const CreateItem = () => {
         e.preventDefault();
         fetch(`${getRootURL()}api/item/create`,{
             method: "POST",
-            headers:{
+            headers: {
                 "Accept": "application/json",
                 "Content-Type": "application/json",
-                "Authorization": "ignored" + " " + localStorage.getItem("token") // TODO put appropriate first element
+                "Authorization": "Bearer" + " " + localStorage.getItem("token")
             },
             body: JSON.stringify({
                 title: title,
