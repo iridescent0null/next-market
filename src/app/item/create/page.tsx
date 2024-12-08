@@ -2,6 +2,8 @@
 import { ItemMessage } from "@/app/api/item/[id]/route";
 import { getRootURL } from "@/app/utlis/config";
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { IdMessage } from "@/app/api/item/create/route";
 
 const CreateItem = () => {
     const [title,setTitle] = useState<string>("");
@@ -9,7 +11,9 @@ const CreateItem = () => {
     const [imagePath,setImagePath] = useState<string>("");
     const [description,setDescription] =useState<string>("");
 
-    const handleSubmit = async (e: FormEvent) => {
+    const router = useRouter();
+
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         fetch(`${getRootURL()}api/item/create`,{
             method: "POST",
@@ -27,10 +31,16 @@ const CreateItem = () => {
             })
         })
         .then(res => res.json())
-        .then((json: ItemMessage) => alert(json.message))
+        .then((json: IdMessage) => {
+            alert("result: " + json.message + ", " + (json.id || ""));
+            if (!json.id) {
+                return;
+            }
+            router.push(`/item/${json.id}`);
+        })
         .catch(err => {
             console.error(err);
-        });
+        })
     };
 
     return (
