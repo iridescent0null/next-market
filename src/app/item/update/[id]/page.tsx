@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { IdMessage } from "@/app/api/item/create/route";
 import { getItem } from "../../[id]/page";
 import ResponseContext, { ItemMessage } from "@/app/api/item/[id]/route";
+import { isCurrentUser } from "@/app/utlis/useAuth";
 
 const UpdateItem = (context: ResponseContext) => {
     const [title,setTitle] = useState<string>("");
@@ -12,6 +13,7 @@ const UpdateItem = (context: ResponseContext) => {
     const [imagePath,setImagePath] = useState<string>("");
     const [description,setDescription] = useState<string>("");
     const [yours,judgeYours] = useState<boolean>(false);
+    const [creator, setCreator] = useState<string>("");
 
     const router = useRouter();
 
@@ -28,6 +30,7 @@ const UpdateItem = (context: ResponseContext) => {
             setPrice(itemMessage.item.price);
             setImagePath(itemMessage.item.image);
             setDescription(itemMessage.item.description);
+            setCreator(itemMessage.item.email);
 
             judgeYours(itemMessage.item.email === localStorage.getItem("email"));
         };
@@ -37,7 +40,24 @@ const UpdateItem = (context: ResponseContext) => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
-        // TODO validate the image: extension is required
+        const hasPeriod = /.+\..*/; // TODO implement similar check also in item creation page 
+        if (!hasPeriod.test(imagePath)) {
+            alert("an extension is a must in image file names");
+            return;
+        }
+
+        const email = localStorage.getItem("email");
+        if (!email) {
+            alert("You have not authenticated (please sign in)");
+            return;
+        }
+
+        const isYours = await isCurrentUser(creator); // if needed, it has the reason of the failure (BooleanMessage.message)
+        judgeYours(isYours.result);
+        if (!isYours.result) {
+            alert("You can update only your items (update is canceled)");
+            return;
+        }
 
         fetch(`${getRootURL()}api/item/update/${(await context.params).id}`, {
             method: "PUT",
@@ -51,12 +71,13 @@ const UpdateItem = (context: ResponseContext) => {
                 price: price,
                 image: imagePath.startsWith("/")? imagePath: "/" + imagePath,
                 description: description,
-                email: localStorage.getItem("email") // TODO is it safe?
+                email: email
             })
         })
         .then(res => res.json())
         .then((json: IdMessage) => {
-            alert("result: " + json.message + ", " + (json.id || ""));
+            console.log(json);
+            alert(json.message);
             if (!json.id) {
                 return;
             }

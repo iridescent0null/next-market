@@ -16,7 +16,7 @@ export async function PUT(request: NextRequest, context: ResponseContext) {
         }
 
         await ItemModel.updateOne({_id: params.id}, reqBody);
-        return NextResponse.json({message: "updated the item successfully"});
+        return NextResponse.json({message: "updated the item successfully", id:params.id});
     } catch (err) {
         console.error(err);
         return NextResponse.json({message: "failed to update the item"});
