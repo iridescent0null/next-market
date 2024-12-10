@@ -8,7 +8,7 @@
   position: relative;
 }
 
-.item div, h3 {
+.item div, h3, h4 {
   margin-left: 25px;
   margin-top: 0px;
   margin-bottom: 0px;
@@ -27,6 +27,12 @@
 
 .disabled-button {
   background-color: gray;
+}
+
+.delete-button {
+  background-color: crimson;
+  border-radius: 10px;
+  margin-left: 20px;
 }
 
 .warning-message {
