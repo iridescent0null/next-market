@@ -1,18 +1,21 @@
 "use client"
 import { getRootURL } from "@/app/utlis/config";
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { IdMessage } from "@/app/api/item/create/route";
 import { getItem } from "../../[id]/page";
 import ResponseContext, { ItemMessage } from "@/app/api/item/[id]/route";
 import { isCurrentUser } from "@/app/utlis/useAuth";
+import Link from "next/link";
 
+/** this page accepct accesses from the others than the items owner (delete page reject those) */
 const UpdateItem = (context: ResponseContext) => {
     const [title,setTitle] = useState<string>("");
     const [price,setPrice] = useState<string>("");
     const [imagePath,setImagePath] = useState<string>("");
     const [description,setDescription] = useState<string>("");
-    const [yours,judgeYours] = useState<boolean>(false);
+    const [yours,judgeYours] = useState<boolean | undefined>(undefined);
+    const [id,setId] = useState<string>();
     const [creator, setCreator] = useState<string>("");
 
     const router = useRouter();
@@ -26,13 +29,17 @@ const UpdateItem = (context: ResponseContext) => {
                 alert("item not found (invalid id?)");
                 return;
             }
+
+            setId(itemMessage.item._id);
+
+            const yoursMessage = await isCurrentUser(itemMessage.item.email);
+            judgeYours(yoursMessage.result);
+
             setTitle(itemMessage.item.title);
             setPrice(itemMessage.item.price);
             setImagePath(itemMessage.item.image);
             setDescription(itemMessage.item.description);
             setCreator(itemMessage.item.email);
-
-            judgeYours(itemMessage.item.email === localStorage.getItem("email"));
         };
         hydrate();
     },[context]);
@@ -89,19 +96,31 @@ const UpdateItem = (context: ResponseContext) => {
     };
 
     return (
-        <>
-            <h2>Item Update</h2>
-            <form onSubmit={handleSubmit}>
-                <input value={title} type="text" name="title" onChange={(e) => setTitle(e.target.value)} placeholder="title shown in the page" required/>
-                <input value={price} type="text" name="price" onChange={(e) => setPrice(e.target.value)} placeholder="price in US dollar"  required/>
-                <input value={imagePath} type="text" name="image" onChange={(e) => setImagePath(e.target.value)} placeholder="path of the product image" required/>
-                <textarea value={description} name="description" onChange={(e) => setDescription(e.target.value)} rows={15} placeholder="description" required/><br/>
-                {yours?
-                    <button>Update!</button>
-                    :<div><button className="disabled-button" disabled>Update!</button><div className="warning-message">* you cannot update the item because it's not yours</div></div>
-                } 
-            </form>
-        </>
+        (yours === void 0)? <h4>loading...</h4>: // prevent hasty rendering
+        yours?
+            <>
+                <h2>Item Update</h2>
+                <form onSubmit={handleSubmit}>
+                    <input value={title} type="text" name="title" onChange={(e) => setTitle(e.target.value)} placeholder="title shown in the page" required/>
+                    <input value={price} type="text" name="price" onChange={(e) => setPrice(e.target.value)} placeholder="price in US dollar"  required/>
+                    <input value={imagePath} type="text" name="image" onChange={(e) => setImagePath(e.target.value)} placeholder="path of the product image" required/>
+                    <textarea value={description} name="description" onChange={(e) => setDescription(e.target.value)} rows={15} placeholder="description" required/><br/>
+                    {yours?
+                        <button>Update!</button>
+                        :<div><button className="disabled-button" disabled>Update!</button><div className="warning-message">* you cannot update the item because it's not yours</div></div>
+                    } 
+                </form>
+            </> 
+        :
+            <>
+                <div className="item">
+                    <div><strong>the item is not yours: </strong> {title}</div>
+                    <div>You can update or delete items only which you've created.</div>
+                    <div>
+                        You still can see the item from <strong><Link href={`/item/${id}`} style={{"textDecoration": "underline"}}> here </Link> </strong>
+                    </div>
+                </div>
+            </>
     );
 };
 

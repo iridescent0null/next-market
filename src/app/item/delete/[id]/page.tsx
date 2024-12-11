@@ -7,12 +7,13 @@ import { getItem } from "../../[id]/page";
 import ResponseContext, { ItemMessage } from "@/app/api/item/[id]/route";
 import { isCurrentUser, rejectAccessNonYourItem } from "@/app/utlis/useAuth";
 
+/** this page rejects accesses from the others than the items owner (update page accept those) */
 const DeleteItem = (context: ResponseContext) => {
     const [title,setTitle] = useState<string>("");
     const [price,setPrice] = useState<string>("");
     const [imagePath,setImagePath] = useState<string>("");
     const [description,setDescription] = useState<string>("");
-    const [yours,judgeYours] = useState<boolean>(false);
+    const [yours,judgeYours] = useState<boolean | undefined>(undefined);
     const [creator, setCreator] = useState<string>("");
 
     const router = useRouter();
@@ -97,6 +98,7 @@ const DeleteItem = (context: ResponseContext) => {
     };
 
     return (
+        (yours === void 0)? <h4>loading...</h4>: // prevent hasty rendering
         <>
             <h2>Item Delete</h2>
             <form onSubmit={handleSubmit}>
