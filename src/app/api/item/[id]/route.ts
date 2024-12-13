@@ -5,11 +5,9 @@ import { ItemModel } from "@/app/utlis/schemaModels";
 interface Parameter {
     id: string
 }
-interface ResponseContext {
+interface RequestContext { //FIXME not RequestContext??
     params: Promise<Parameter>
 }
-
-// FIXME rectify the path of this page (readsingle is bizarre)
 
 interface Item {
     _id: string,
@@ -20,13 +18,12 @@ interface Item {
     email: string,
     __v: number
 }
-
 interface ItemMessage {
     message: string,
     item?: Item
 }
 
-export async function GET(ignored: unknown, context: ResponseContext) { // context must be placed in the second position
+export async function GET(ignored: unknown, context: RequestContext) { // context must be placed in the second position
     const params: Parameter = await context.params;
     try {
         await connectDB();
@@ -38,6 +35,6 @@ export async function GET(ignored: unknown, context: ResponseContext) { // conte
     }
 }
 
-export default ResponseContext; // FIXME move it to more appropriate place
+export default RequestContext; // FIXME move it to more appropriate place
 export type { Item };
 export type { ItemMessage };

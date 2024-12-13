@@ -1,4 +1,4 @@
-import ResponseContext from "@/app/api/item/[id]/route";
+import RequestContext from "@/app/api/item/[id]/route";
 import { getRootURL } from "@/app/utlis/config";
 import { Item, ItemMessage } from "@/app/api/item/[id]/route";
 import Image from "next/image";
@@ -10,7 +10,7 @@ const getItem = async (id: string) => {
         .catch(err => {console.error(err); return {message: "not found"} as ItemMessage});
 };
 
-const ViewItem = async (context: ResponseContext) => {
+const ViewItem = async (context: RequestContext) => {
     const params = await context.params;
     let item: Item | undefined;
 

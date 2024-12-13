@@ -4,12 +4,12 @@ import { FormEvent, useState, useEffect, CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { IdMessage } from "@/app/api/item/create/route";
 import { getItem } from "../../[id]/page";
-import ResponseContext, { ItemMessage } from "@/app/api/item/[id]/route";
+import RequestContext, { ItemMessage } from "@/app/api/item/[id]/route";
 import { isCurrentUser } from "@/app/utlis/useAuth";
 import Link from "next/link";
 
 /** this page accepct accesses from the others than the items owner (delete page reject those) */
-const UpdateItem = (context: ResponseContext) => {
+const UpdateItem = (context: RequestContext) => {
     const [title,setTitle] = useState<string>("");
     const [price,setPrice] = useState<string>("");
     const [imagePath,setImagePath] = useState<string>("");

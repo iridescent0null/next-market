@@ -4,11 +4,11 @@ import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IdMessage } from "@/app/api/item/create/route";
 import { getItem } from "../../[id]/page";
-import ResponseContext, { ItemMessage } from "@/app/api/item/[id]/route";
-import { isCurrentUser, rejectAccessNonYourItem } from "@/app/utlis/useAuth";
+import RequestContext, { ItemMessage } from "@/app/api/item/[id]/route";
+import { isCurrentUser } from "@/app/utlis/useAuth";
 
 /** this page rejects accesses from the others than the items owner (update page accept those) */
-const DeleteItem = (context: ResponseContext) => {
+const DeleteItem = (context: RequestContext) => {
     const [title,setTitle] = useState<string>("");
     const [price,setPrice] = useState<string>("");
     const [imagePath,setImagePath] = useState<string>("");

@@ -38,3 +38,7 @@
 .warning-message {
   color: brown;
 }
+
+.button-wrapper {
+  text-align: center;
+}
