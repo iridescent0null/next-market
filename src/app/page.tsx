@@ -3,8 +3,7 @@ import { AllItemsMessage } from "./api/item/readall/route";
 import Image from "next/image";
 import { getRootURL } from "./utlis/config";
 import Link from "next/link";
-import RequestContext, { Item, ItemMessage } from "./api/item/[id]/route";
-import { getItem } from "./item/[id]/page";
+import { Item } from "./api/item/[id]/route";
 import { useEffect, useState } from "react";
 import { ItemsMessage } from "./api/item/route";
 
@@ -15,35 +14,13 @@ interface ImageSource {
   quality?: number
 }
 
-type paging = "previous" | "new" | "next";
+type paging = "previous" | "new" | "next" | "neutral";
 
-const getAllItems = async () => {
-  return fetch(`${getRootURL()}api/item/readall`)
-    .then(res => res.json() as Promise<AllItemsMessage>)
-    .then(json => {
-      json.items! //TODO null check
-        .forEach(async item => {
-          const image = item.image;
-          // const img = await attempToParseImageURL(item);
-          const img = image;
-          if (!img) {
-            item.image = "";
-          }
-        })
-      return json;
-    })
-    .catch(err => {
-      console.error(err);
-      // the err doesn't have json form, then new json object is needed to return the response
-      return Promise.resolve({message: "failed to get items"} ) as Promise<AllItemsMessage>;
-    });
-};
-
-const attempToParseImageURLFromSrc = (imgSrc: ImageSource) => {
+const attempToParseImageURLFromSrc = (imgSrc: ImageSource) => { // FIXME suppress the 400 error
   let url = imgSrc.src; //like "/foo.png" (starting with a slash and ending with its extension)
   let rtnValue: string | null;
   rtnValue = null; // unfortunetely TS insists the variable might not be initialized without this line...
-  rtnValue = `${getRootURL()}_next/image/?url=${url}&w=3840&q=1`; //FIXME use the width and quality values in the imgSrc
+  rtnValue = `${getRootURL()}_next/image/?url=${url}&w=${imgSrc.width?imgSrc.width:3840}&q=${imgSrc.quality?imgSrc.quality:1}`;
   try {
     fetch(rtnValue)
       .then (res => {
@@ -62,54 +39,88 @@ const attempToParseImageURLFromSrc = (imgSrc: ImageSource) => {
   }
 };
 
-const ReadItemPaging = (context: RequestContext) => { // TODO context is needed?
+const ReadItemPaging = () => {
   const [page, setPage] = useState<number>(1);
-  const [itemPerPage, setItemPerPage] = useState<number>(5); // currently effectively constant
-  const [itemState, setItems] = useState<(Item | undefined)[]>([]); // todo remove the undefined[]
+  const [itemPerPage] = useState<number>(5);
+  const [itemState, setItems] = useState<(Item | undefined)[]>([]); // TODO remove the undefined element
   const [direction, setDirection] = useState<paging>("new");
+  const [allItemsCount,setAllItemsCount] = useState<number>(0);
 
-useEffect(() => {
-  const hydrate = () => {
-    const pageToBeShown = page + ((direction === "next")? (+1) : (direction === "new")? 0 : -1);
-    setDirection("new");
-    setPage(pageToBeShown);
-    const ids = (JSON.parse(localStorage.getItem("allIds")!) as string[])
-      .slice((pageToBeShown-1)*5,(pageToBeShown-1)*5+5);
-    
-    fetch(`${getRootURL()}api/item/`,{
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": "Bearer" + " " + localStorage.getItem("token")
-      },
-      body: JSON.stringify({
-        ids: ids
-      })
-    })
-    .then(res => res.json())
-    .then((message: ItemsMessage) => {
-      if (!message.items ) {
-        console.log(message.message);
-        throw new Error();
+  useEffect(() => {
+    const hydrate = () => {
+      const pageToBeShown = page + ((direction === "next")? +1 : (direction === "previous")? -1 : 0);
+      const startIndex = (pageToBeShown-1)*itemPerPage;
+      setDirection("neutral");
+      setPage(pageToBeShown);
+
+      let idPromise: Promise<string[]>;
+      if (!localStorage.getItem("allIds")) {
+        idPromise = fetch(`${getRootURL()}api/item/readall?type=id`)
+          .then(res => res.json())
+          .then((message: AllItemsMessage) => message.ids)
+          .then(retrievedIds => {
+            localStorage.setItem("allIds", JSON.stringify(retrievedIds!));
+            return retrievedIds!.slice(startIndex, startIndex+itemPerPage);
+          });
+      } else {
+        idPromise = Promise.resolve(
+          (JSON.parse(localStorage.getItem("allIds")!) as string[])
+              .slice(startIndex, startIndex+itemPerPage)
+        );
       }
-      console.log(message.items);
-      return message.items;
-    })
-    .then(items => setItems(items));
-  };
-  hydrate();
-},[direction,page]);
+
+      idPromise.then(ids =>
+        fetch(`${getRootURL()}api/item/`,{
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer" + " " + localStorage.getItem("token")
+          },
+          body: JSON.stringify({
+            ids: ids
+          })
+      }))
+      .then(res => res.json())
+      .then((message: ItemsMessage) => {
+        if (!message.items) {
+          console.log(message.message);
+          throw new Error();
+        }
+        return message.items;
+      })
+      .then(items => setItems(items))
+      .catch(err=>{
+        console.error(err);
+      });
+    };
+    hydrate();
+  },[direction,page]);
+
+  // setting the number of item (regarding it as static)
+  fetch(`${getRootURL()}api/item/readall?type=count`)
+      .then(res => res.json() as Promise<AllItemsMessage>)
+      .then(message => {
+        setAllItemsCount(message.count);
+      });
 
   return (
-    !itemState? <>loading</>:
+    (!itemState || itemState.length < 1)? <>loading</>:
     <>
       <h1 className="greeting"> Available Products (pagination)</h1>
       <div className="button-wrapper">
-        <button onClick={() => setDirection("previous")}>&#60;</button><button onClick={event =>{setDirection("next") }}>&#62;</button>
+      {(page > 1)? 
+        <button onClick={() => setDirection("previous")}>&#60;</button>
+        : <button className="disabled-button" disabled>&#60; </button>
+      }
+      {(Math.ceil(allItemsCount/itemPerPage) - page > 0)?
+        <button onClick={() =>{setDirection("next") }}>&#62;</button>
+        : <button className="disabled-button" disabled>&#62; </button>
+      }
       </div>
       <div className="page-number-wrapper">
-        <span className="page-number" >{page} / TotalPageNumber</span>
+        <span className="page-number" >{page} / {Math.ceil(allItemsCount/itemPerPage)}</span>
+        <div>items: {allItemsCount}</div>
       </div>
       
       {
@@ -129,46 +140,9 @@ useEffect(() => {
           </div>
         })
       }
-
     </>
   )
 }
-
-const ReadAllItems = async () => { // currently suppressed
-  const allItems = await getAllItems();
-
-  console.log(allItems);
-
-  const ids =  allItems.items! //TODO null check
-    .map(item => item._id);
-
-  localStorage.setItem("allIds", JSON.stringify(ids));
-
-  const items = allItems.items;
-  return (
-    <>
-      <h1 className="greeting"> Available Products </h1>
-      {!items? "":
-        items.map(async item => {
-          const imagePath = item.image;
-          return <div key={item._id} className="item">
-            <Link href={`/item/${item._id}`}>
-              <h3>{item.title}</h3>
-              <h3>{"$"+item.price}</h3>
-              <div>{item.description}</div>
-              <div className="img-wrapper">
-                {imagePath?
-                  <Image loader={attempToParseImageURLFromSrc} src={imagePath} fill={true} alt={"product image"}/>
-                  :<span><i>image not found</i></span>
-                }
-              </div>
-            </Link>
-          </div>
-        })
-      }
-    </>
-  );
-};
 
 export default ReadItemPaging;
 export const dynamic = "force-dynamic";

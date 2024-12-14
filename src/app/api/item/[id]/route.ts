@@ -5,7 +5,7 @@ import { ItemModel } from "@/app/utlis/schemaModels";
 interface Parameter {
     id: string
 }
-interface RequestContext { //FIXME not RequestContext??
+interface RequestContext {
     params: Promise<Parameter>
 }
 
