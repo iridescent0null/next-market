@@ -16,33 +16,52 @@ interface ImageSource {
 
 type paging = "previous" | "new" | "next" | "neutral";
 
-const attempToParseImageURLFromSrc = (imgSrc: ImageSource) => { // FIXME suppress the 400 error
-  let url = imgSrc.src; //like "/foo.png" (starting with a slash and ending with its extension)
-  let rtnValue: string | null;
-  rtnValue = null; // unfortunetely TS insists the variable might not be initialized without this line...
-  rtnValue = `${getRootURL()}_next/image/?url=${url}&w=${imgSrc.width?imgSrc.width:3840}&q=${imgSrc.quality?imgSrc.quality:1}`;
+const problematicImages = new Set<string>();
+const dummyImagePath = "/blank.png";
+
+/** 
+ * If it has valid image file as src, return it. If not, return the path to dummy png file \
+ * Non-first attempts to parse a specific file are canceled and to get the dummy png file path immediately. 
+ */
+const attempToParseImageURLFromSrc = (imgSrc: ImageSource) => {
+  let path = imgSrc.src; // should be like "/foo.png" (starting with a slash and ending with its extension)
+  let rtnValue: string;
+
+  // suppress attempts to check the image already failed
+  if (problematicImages.has(path)) {
+    return dummyImagePath;
+  }
+
+  rtnValue = `${getRootURL()}_next/image/?url=${path}&w=${1080}&q=${imgSrc.quality?imgSrc.quality:75}`; // for some reason, imgSrc.width has an invalid value (like 500) then we can't adopt it there
   try {
     fetch(rtnValue)
       .then (res => {
-        rtnValue = res.ok? url : null; 
+        if (!res.ok) {
+          problematicImages.add(path);
+          rtnValue = dummyImagePath;
+        } else {
+          rtnValue = path;
+        }
       })
-      .catch(() => {rtnValue = null});
+      .catch(() => {rtnValue = dummyImagePath});
 
-    if (!rtnValue) {
-      console.error(`invalid item image: ${url}`);
-      return "";
+    if (!rtnValue) { // guard against errors which rarely happen
+      console.error(`invalid item image: ${path}`);
+      problematicImages.add(path);
+      return dummyImagePath;
     }
+
     return rtnValue;
   } catch (err) {
-    console.error(`invalid item image: ${url}`);
-    return "";
+    console.error(`invalid item image: ${path}`);
+    return dummyImagePath;
   }
 };
 
 const ReadItemPaging = () => {
   const [page, setPage] = useState<number>(1);
-  const [itemPerPage] = useState<number>(5);
-  const [itemState, setItems] = useState<(Item | undefined)[]>([]); // TODO remove the undefined element
+  const [itemPerPage] = useState<number>(5); // currently effective constant
+  const [itemState, setItems] = useState<Item[]>([]);
   const [direction, setDirection] = useState<paging>("new");
   const [allItemsCount,setAllItemsCount] = useState<number>(0);
 
@@ -53,9 +72,9 @@ const ReadItemPaging = () => {
       setDirection("neutral");
       setPage(pageToBeShown);
 
-      let idPromise: Promise<string[]>;
+      let shownItemIdsPromise: Promise<string[]>;
       if (!localStorage.getItem("allIds")) {
-        idPromise = fetch(`${getRootURL()}api/item/readall?type=id`)
+        shownItemIdsPromise = fetch(`${getRootURL()}api/item/readall?type=id`)
           .then(res => res.json())
           .then((message: AllItemsMessage) => message.ids)
           .then(retrievedIds => {
@@ -63,13 +82,13 @@ const ReadItemPaging = () => {
             return retrievedIds!.slice(startIndex, startIndex+itemPerPage);
           });
       } else {
-        idPromise = Promise.resolve(
+        shownItemIdsPromise = Promise.resolve(
           (JSON.parse(localStorage.getItem("allIds")!) as string[])
               .slice(startIndex, startIndex+itemPerPage)
         );
       }
 
-      idPromise.then(ids =>
+      shownItemIdsPromise.then(ids =>
         fetch(`${getRootURL()}api/item/`,{
           method: "POST",
           headers: {
@@ -95,7 +114,7 @@ const ReadItemPaging = () => {
       });
     };
     hydrate();
-  },[direction,page]);
+  },[direction]);
 
   // setting the number of item (regarding it as static)
   fetch(`${getRootURL()}api/item/readall?type=count`)
