@@ -126,20 +126,20 @@ const ReadItemPaging = () => {
   return (
     (!itemState || itemState.length < 1)? <>loading</>:
     <>
-      <h1 className="greeting"> Available Products (pagination)</h1>
+      <h1 className="greeting"> Available Products</h1>
       <div className="button-wrapper">
       {(page > 1)? 
-        <button onClick={() => setDirection("previous")}>&#60;</button>
-        : <button className="disabled-button" disabled>&#60; </button>
+        <button onClick={() => setDirection("previous")} className="direction-button">&#60;</button>
+        : <button className="disabled-button direction-button" disabled>&#60; </button>
       }
       {(Math.ceil(allItemsCount/itemPerPage) - page > 0)?
-        <button onClick={() =>{setDirection("next") }}>&#62;</button>
-        : <button className="disabled-button" disabled>&#62; </button>
+        <button onClick={() =>{setDirection("next") }} className="direction-button">&#62;</button>
+        : <button className="disabled-button direction-button" disabled >&#62; </button>
       }
       </div>
       <div className="button-wrapper">
-        <button onClick={() =>  {localStorage.setItem("allIds",""); setDirection("new")}}> force reload</button>
-        <div>note: if you cannot items which are created recently, the button may help to find those</div>
+        <button onClick={() =>  {localStorage.setItem("allIds",""); setDirection("new")}} className="direction-button"> force reload</button>
+        <div className="minor-note">note: if you cannot see items which are created recently, the button may help to find those</div>
       </div>
       <div className="page-number-wrapper">
         <span className="page-number" >{page} / {Math.ceil(allItemsCount/itemPerPage)}</span>
@@ -152,14 +152,19 @@ const ReadItemPaging = () => {
           :<div key={item?._id} className="item">
             <Link href={`/item/${item._id}`}>
               <h3>{item.title}</h3>
-              <h3>${item.price}</h3>
-              <h3>{item.description}</h3>
-              <div className="img-wrapper">
-                {!item.image?<><i>image not found</i></>
-                  :<Image loader={attempToParseImageURLFromSrc} src={item.image} fill={true} alt={`product image of ${item.title}`}/>
-                }
+              <h4 className="price">${item.price}</h4><span className="minor-note"> tax included</span>
+              <div className="two-wrapper">
+                <div className="img-wrapper">
+                  {!item.image?<><i>image not found</i></>
+                    :<Image loader={attempToParseImageURLFromSrc} src={item.image} fill={true} alt={`product image of ${item.title}`}/>
+                  }
+                </div>
+                <div className="description">{item.description}</div>
               </div>
             </Link>
+            <div className="right-button-wrapper">
+              <button className="cart-button">add to cart</button>
+            </div>
           </div>
         })
       }
