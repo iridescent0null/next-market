@@ -137,6 +137,10 @@ const ReadItemPaging = () => {
         : <button className="disabled-button" disabled>&#62; </button>
       }
       </div>
+      <div className="button-wrapper">
+        <button onClick={() =>  {localStorage.setItem("allIds",""); setDirection("new")}}> force reload</button>
+        <div>note: if you cannot items which are created recently, the button may help to find those</div>
+      </div>
       <div className="page-number-wrapper">
         <span className="page-number" >{page} / {Math.ceil(allItemsCount/itemPerPage)}</span>
         <div>items: {allItemsCount}</div>
