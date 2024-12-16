@@ -38,3 +38,4 @@ export async function GET(ignored: unknown, context: RequestContext) { // contex
 export default RequestContext; // FIXME move it to more appropriate place
 export type { Item };
 export type { ItemMessage };
+export type { Parameter};
