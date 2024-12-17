@@ -6,6 +6,9 @@ import Link from "next/link";
 import { Item } from "./api/item/[id]/route";
 import { useEffect, useState } from "react";
 import { ItemsMessage } from "./api/item/route";
+import { Inventory } from "./api/inventory/[id]/route";
+import { InventoriesMessage } from "./api/inventory/route";
+import InventoryPart from "@/components/inventory";
 
 /** for Next's Image's loader property */
 interface ImageSource {
@@ -64,6 +67,7 @@ const ReadItemPaging = () => {
   const [itemState, setItems] = useState<Item[]>([]);
   const [direction, setDirection] = useState<paging>("new");
   const [allItemsCount,setAllItemsCount] = useState<number>(0);
+  const [inventories, setInventories] = useState<(Inventory | undefined)[]>([]);
 
   useEffect(() => {
     const hydrate = () => {
@@ -89,32 +93,55 @@ const ReadItemPaging = () => {
       }
 
       shownItemIdsPromise.then(ids =>
-        fetch(`${getRootURL()}api/item/`,{
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Authorization": "Bearer" + " " + localStorage.getItem("token")
-          },
-          body: JSON.stringify({
-            ids: ids
+          fetch(`${getRootURL()}api/item/`,{
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "Authorization": "Bearer" + " " + localStorage.getItem("token")
+            },
+            body: JSON.stringify({
+              ids: ids
+            })
+          }))
+          .then(res => res.json())
+          .then((message: ItemsMessage) => {
+            if (!message.items) {
+              console.log(message.message);
+              throw new Error();
+            }
+            return message.items;
           })
-      }))
-      .then(res => res.json())
-      .then((message: ItemsMessage) => {
-        if (!message.items) {
-          console.log(message.message);
-          throw new Error();
-        }
-        return message.items;
-      })
-      .then(items => setItems(items))
-      .catch(err=>{
-        console.error(err);
-      });
+          .then(items => {
+            setItems(items);
+            fetch(`${getRootURL()}api/inventory/`,{
+              method: "POST",
+              headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "Authorization": "Bearer" + " " + localStorage.getItem("token")
+              },
+              body: JSON.stringify({
+                ids: items.map(item => item._id)
+              })
+          })
+          .then(res => res.json())
+          .then((message: InventoriesMessage) => {
+            if (!message.message || !message.inventories) {
+              console.error(message.message);
+              throw new Error(); //TODO explain it
+            }
+            return message.inventories;
+          })
+          .then(inventories => setInventories(inventories!));      
+          })
+          .catch(err=>{
+            console.error(err);
+          });
+
     };
     hydrate();
-  },[direction]);
+  }, [direction]);
 
   // setting the number of item (regarding it as static)
   fetch(`${getRootURL()}api/item/readall?type=count`)
@@ -162,9 +189,19 @@ const ReadItemPaging = () => {
                 <div className="description">{item.description}</div>
               </div>
             </Link>
-            <div className="right-button-wrapper">
-              <button className="cart-button">add to cart</button>
-            </div>
+              {!inventories.find(inventory => inventory?.item === item?._id)?<>sorry <strong>not avaliable</strong> now!</>
+                :<div className="purchase-area">
+                  <InventoryPart inventory={inventories.find(inventory => inventory?.item === item?._id)!}/>
+                  <div className="forty-padding">
+                  </div>
+                  <div className="right-button-wrapper thirty-padding">
+                  { (new Date((inventories.find(inventory => inventory?.item === item?._id)?.release) as string) > new Date())? // FIXME very unfortunatelly, release value are string, not date...
+                      <button className="cart-button disabled-button" disabled>add to cart</button>
+                      :<button className="cart-button">add to cart</button>
+                  }
+                  </div>
+                </div>
+              }
           </div>
         })
       }

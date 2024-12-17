@@ -87,4 +87,4 @@ export async function GET(ignored: unknown, context: RequestContext) {
     }
 }
 
-export type { Inventory };
+export type { Inventory, InventoryMessage };

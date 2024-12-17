@@ -135,3 +135,23 @@ header .cart-button {
 .disabled-button {
   background-color: gray;
 }
+
+.inventory-wrapper {
+  margin: 20px;
+}
+
+.purchase-area {
+  display: flex;
+}
+
+.thirty-padding {
+  width: 30vw;
+}
+
+.forty-padding {
+  width: 40vw;
+}
+
+.item .disabled-button {
+  background-color: gray;
+}
