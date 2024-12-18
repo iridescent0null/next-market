@@ -131,6 +131,16 @@ const ReadItemPaging = () => {
               console.error(message.message);
               throw new Error(); //TODO explain it
             }
+            // re-convert the date in strings to pure Dates
+            message.inventories = message.inventories.map(
+                inventory => {
+                  inventory.release = new Date(inventory.release);
+                  inventory.discontinue = inventory.discontinue?
+                      new Date(inventory.discontinue)
+                      : undefined;
+                  return inventory;
+                }
+            )
             return message.inventories;
           })
           .then(inventories => setInventories(inventories!));      
@@ -138,7 +148,6 @@ const ReadItemPaging = () => {
           .catch(err=>{
             console.error(err);
           });
-
     };
     hydrate();
   }, [direction]);
@@ -195,7 +204,7 @@ const ReadItemPaging = () => {
                   <div className="forty-padding">
                   </div>
                   <div className="right-button-wrapper thirty-padding">
-                  { (new Date((inventories.find(inventory => inventory?.item === item?._id)?.release) as string) > new Date())? // FIXME very unfortunatelly, release value are string, not date...
+                  { ((inventories.find(inventory => inventory?.item === item?._id)!.release) > new Date())?
                       <button className="cart-button disabled-button" disabled>add to cart</button>
                       :<button className="cart-button">add to cart</button>
                   }

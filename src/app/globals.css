@@ -27,8 +27,6 @@
   text-decoration: none; 
 }
 
-
-
 .delete-button {
   background-color: crimson;
   border-radius: 10px;
@@ -138,6 +136,11 @@ header .cart-button {
 
 .inventory-wrapper {
   margin: 20px;
+}
+
+.inventory-wrapper .minor-note {
+  font-size: small;
+  margin-left: 0px;
 }
 
 .purchase-area {
