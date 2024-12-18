@@ -24,9 +24,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher:[
+    matcher:[ //FIXME use it with inventory!
         "/api/item/create",
         "/api/item/update/:path*",
-        "/api/item/delete/:path*"
+        "/api/item/delete/:path*",
+        "/api/cart/:path*"
     ]
 };

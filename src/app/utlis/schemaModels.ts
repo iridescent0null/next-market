@@ -46,6 +46,30 @@ const InventorySchema = new Schema({
     }
 });
 
+const OrderSchema = new Schema({
+    user: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "User"   
+    },
+    item: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Item"
+    },
+    quantity: {
+        type: Number,
+        required: true
+    }
+});
+
+OrderSchema.index(
+    {user: 1, item: 1},
+    {unique: true}
+);
+
+
 export const ItemModel = mongoose.models.Item || mongoose.model("Item", ItemSchema); // what's the former??
 export const UserModel = mongoose.models.User || mongoose.model("User", UserSchema);
 export const InventoryModel = mongoose.models.Inventory || mongoose.model("Inventory", InventorySchema);
+export const OrderModel = mongoose.models.Order || mongoose.model("Order" , OrderSchema);
