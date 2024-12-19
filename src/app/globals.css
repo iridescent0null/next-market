@@ -14,7 +14,7 @@
   margin-bottom: 0px;
 }
 
-.item {
+.item, .order {
   margin: 20px;
   background-color:darkslategray;
   border: 1px;

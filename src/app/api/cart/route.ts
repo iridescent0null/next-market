@@ -3,7 +3,6 @@ import { Schema } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { Item } from "../item/[id]/route";
 import { ItemModel, OrderModel, UserModel } from "@/app/utlis/schemaModels";
-import { Order } from "@/app/cart/page";
 
 interface CartCreationRequest {
     item: Schema.Types.ObjectId,
@@ -18,8 +17,21 @@ interface User { // temporal interface for dev
 
 interface CartMessage {
     message: string,
-    orders?: Order[]
+    orders?: MaterializedOrder[]
 }
+
+interface OrderInMongo { // in DB
+    item: string,
+    quantity: number,
+    user: string
+}
+
+interface MaterializedOrder { // should returned
+    item: Item,
+    quantity: number,
+    user: string
+}
+
 
 export async function PUT (request: NextRequest) {
     try {
@@ -65,7 +77,7 @@ export async function POST(request: NextRequest) {
     try {
         const params: User = await request.json();
 
-        await connectDB(); //FIXME don't connect the DB as the user
+        await connectDB();
         const users: User[] = await UserModel.find({email: params.email});
         if (!users || users.length < 1) {
             return new NextResponse("the user is gone", {status: 410});
@@ -77,8 +89,24 @@ export async function POST(request: NextRequest) {
             throw new Error();
         }
 
-        const orders: Order[] = await OrderModel.find({user: users[0]});
-        return NextResponse.json({message: "success", orders:orders} as CartMessage);
+        const retrievedOrders: OrderInMongo[] = await OrderModel.find({user: users[0]});
+
+        const ids = retrievedOrders.map(order => order.item)
+        const foundItems: Item[] = await ItemModel.find({
+            _id: {
+                $in: ids
+            }
+        });
+
+        const filledOrders = retrievedOrders.map(order => { 
+            return {
+                item: foundItems.find(item => item._id.toString() === order.item.toString()),
+                quantity: order.quantity,
+                user: order.user
+            } as MaterializedOrder
+        });
+
+        return NextResponse.json({message: "success", orders:filledOrders} as CartMessage);
 
     } catch (err) {
         console.log(err);
@@ -87,4 +115,3 @@ export async function POST(request: NextRequest) {
 }
 
 export type { CartMessage };
-    // retrieving, not creation

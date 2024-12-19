@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { getRootURL } from "./../utlis/config";
 import { CartMessage } from "../api/cart/route";
+import { Item } from "../api/item/[id]/route";
 
 interface Order {
-    item: string,
+    item: Item,
     quantity: number,
     user: string
 }
@@ -15,22 +16,16 @@ interface CartProps {
     }
 }
 
-const mock: Order[] = [{item: "123456789", quantity:2, user:"me"}
-    ,{item: "234567890", quantity:3, user:"me"}
-    ,{item: "345678901", quantity:55555, user:"me"}]
-
 const Cart = (props: CartProps) => {
-    const [orders, setOrders] = useState<Order[]>();
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [total, setTotal] = useState<number>(0);
 
-    useEffect(() => { // FIXME this page causes infinite loop
+    useEffect(() => {
         const hydrate = () => { 
-
-            if (!props || !props.user) { // FIXME naive mock
-                props = {};
-                props.user = {};
-                props.user.email = "Hanako@exmaple.co.jp";
+            const email = props.user.email;
+            if (!email) {
+                return;
             }
-
             fetch(`${getRootURL()}api/cart`, {
                 method: "POST",
                 headers: {
@@ -39,28 +34,45 @@ const Cart = (props: CartProps) => {
                   "Authorization": "Bearer" + " " + localStorage.getItem("token")
                 },
                 body: JSON.stringify({
-                    email: props.user.email
+                    email: email
                   })
             })
             .then(res => res.json())
-            .then((json: CartMessage) => setOrders(json.orders));
-           // setOrders(mock);
+            .then((json: CartMessage) => {
+                setOrders(json.orders? json.orders : []);
+                let total = 0;
+                json.orders?.forEach(order =>{
+                    const price = Number.parseInt(order.item.price);
+                    if (price) {
+                        total += price * order.quantity;
+                    }
+                })
+                setTotal(total);
+            })
+            .catch(() => setOrders([]));
         }
         hydrate()
     },
-    [orders,props]
+    [props.user]
     );
 
-    return <>
+
+    // TODO blaim non number price
+    return <> 
         {!orders? <>no items in your cart...</>
         :orders.map(order => {
-            return (<div key={order.item}>
-                <div>title: {order.item}</div>
-                <div>quality: {order.quantity}</div>
-                <div>------</div>
+            return (
+            <div key={order.item._id} className="order">
+                <div>title: {order.item.title}</div>
+                <div>quantity: {order.quantity}</div>
+                <div>price: {order.item.price}</div>
             </div>
         )
         })}
+        {
+            (!orders || !orders.length)? <></>
+            : <div>Total: {total}</div>
+        }
         </>
 }
 
