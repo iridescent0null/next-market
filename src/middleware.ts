@@ -36,6 +36,5 @@ export const config = {
         "/api/item/update/:path*",
         "/api/item/delete/:path*",
         "/api/cart/:path*",
-        "/api/homepage/:path*"
     ]
 };
