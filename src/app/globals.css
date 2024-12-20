@@ -14,7 +14,7 @@
   margin-bottom: 0px;
 }
 
-.item, .order {
+.item {
   margin: 20px;
   background-color:darkslategray;
   border: 1px;
@@ -157,4 +157,53 @@ header .cart-button {
 
 .item .disabled-button {
   background-color: gray;
+}
+
+.number-input {
+  text-align: center;
+  width: 50px;
+  border-radius: 20px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.cancel-button, .checkout-button {
+  background-color: brown;
+  border-radius: 20px;
+  margin-left: calc(90% - 40px);
+}
+
+.cancel-button {
+  margin-top: calc(30% - 16px);
+}
+
+.checkout-button {
+  margin-top: 20px;
+}
+
+.order {
+  margin: 20px;
+  background-color:darkslategray;
+  border: 1px;
+  border-color: darkorange;
+  border-radius: 20px;
+  display: flex;
+}
+
+.order .order-main{
+  margin: 20px;
+}
+
+.purchase-list-tail {
+  border-top-color: gray;
+  border-top: 1px solid gray;
+  margin: 30px;
 }

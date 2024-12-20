@@ -4,11 +4,12 @@ import Image from "next/image";
 import { getRootURL } from "./utlis/config";
 import Link from "next/link";
 import { Item } from "./api/item/[id]/route";
-import { useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { ItemsMessage } from "./api/item/route";
 import { Inventory } from "./api/inventory/[id]/route";
 import { InventoriesMessage } from "./api/inventory/route";
 import InventoryPart from "@/components/inventory";
+import { CartCreationRequest } from "./api/cart/route";
 
 /** for Next's Image's loader property */
 interface ImageSource {
@@ -152,6 +153,28 @@ const ReadItemPaging = () => {
     hydrate();
   }, [direction]);
 
+  const addCart = (event: SyntheticEvent, quantity: HTMLInputElement) => {
+    event.preventDefault();
+
+    fetch(`${getRootURL()}api/cart`,{
+      method: "PUT",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "Authorization": "Bearer" + " " + localStorage.getItem("token")
+      },
+      body: JSON.stringify({
+        item: quantity.id.substring(9) as any, // It should be ObjectId. but, generating ObjectId instance causes error...
+        quantity: quantity.valueAsNumber,
+        email: localStorage.getItem("email")
+      } as CartCreationRequest)
+    })
+    .then(res => {
+      alert("added to your cart");
+    })
+    .catch(err=> console.error(err))
+  }
+
   // setting the number of item (regarding it as static)
   fetch(`${getRootURL()}api/item/readall?type=count`)
       .then(res => res.json() as Promise<AllItemsMessage>)
@@ -205,8 +228,27 @@ const ReadItemPaging = () => {
                   </div>
                   <div className="right-button-wrapper thirty-padding">
                   { ((inventories.find(inventory => inventory?.item === item?._id)!.release) > new Date())?
-                      <button className="cart-button disabled-button" disabled>add to cart</button>
-                      :<button className="cart-button">add to cart</button>
+                      <form>
+                        <button className="cart-button disabled-button" disabled>add to cart</button>
+                      </form>
+                      :
+                      <form>
+                        <button onClick={e => {
+                          e.preventDefault();
+                          const input = document.getElementById(`quantity-${item._id}`) as HTMLInputElement;
+                          if (input.valueAsNumber < 1) {
+                            return;
+                          }
+                          input.valueAsNumber = input.valueAsNumber - 1} 
+                        }> - </button>
+                        <input className="number-input" type="number" id={`quantity-${item._id}`} value={1} />
+                        <button onClick={e => {
+                          e.preventDefault();
+                          const input = document.getElementById(`quantity-${item._id}`) as HTMLInputElement;
+                          input.valueAsNumber = input.valueAsNumber + 1} 
+                        }> + </button>
+                        <button className="cart-button" onClick={ e => addCart(e, document.getElementById(`quantity-${item._id}`)! as HTMLInputElement)}>add to cart</button>
+                      </form>
                   }
                   </div>
                 </div>

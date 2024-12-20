@@ -12,7 +12,9 @@ const Header = () => {
                     </div>
                 </Link>
                 <div className="right-button-wrapper">
-                <button className="cart-button">Cart</button>
+                <Link href="/homepage">
+                    <button className="cart-button">Cart</button>
+                </Link>
                 </div>
                 <div className="note">
                     <h4>Note: </h4>
