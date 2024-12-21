@@ -198,12 +198,45 @@ input[type=number] {
   display: flex;
 }
 
-.order .order-main{
+.order .order-main {
   margin: 20px;
+}
+
+.fixed-order {
+  background-color: darkolivegreen
 }
 
 .purchase-list-tail {
   border-top-color: gray;
   border-top: 1px solid gray;
   margin: 30px;
+}
+
+.checkin-info {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  margin: 40px;
+  font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  text-align: center;
+}
+
+.checkin-info div {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.checkin-info select {
+  width: 200px;
+}
+
+.order-button {
+  background-color: brown;
+  border-radius: 20px;
+  margin: auto;
+  font-size: large;
+  padding: 10px;
+}
+
+.order-button-wrapper {
+  text-align: center;
 }

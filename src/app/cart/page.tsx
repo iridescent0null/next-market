@@ -14,6 +14,7 @@ interface CartProps {
     user: {
         email: string
     }
+    fixed: boolean;
 }
 
 const Cart = (props: CartProps) => {
@@ -61,8 +62,8 @@ const Cart = (props: CartProps) => {
                 alert("Error happens. Try to sign in again or try later");
                 console.log(err);
             });
-        }
-        hydrate()
+        };
+        hydrate();
     },
     [props.user, modified]
     );
@@ -101,7 +102,7 @@ const Cart = (props: CartProps) => {
     const proceedToCheckout = (event: SyntheticEvent) => {
         event.preventDefault();
         alert("implementing...");
-        console.log(event)
+        console.log(event);
         return;
     }
 
@@ -110,7 +111,7 @@ const Cart = (props: CartProps) => {
         {!orders? <>no items in your cart...</>
         :orders.map(order => {
             return (
-            <div key={order.item._id} className="order">
+            <div key={order.item._id} className={props.fixed? "fixed-order order" : "order"}>
                 <div className="forty-padding order-main">
                     <div>title: {order.item.title}</div>
                     <div>quantity: {order.quantity}</div>
@@ -119,16 +120,22 @@ const Cart = (props: CartProps) => {
                 <div className="thirty-padding">
                 </div>
                 <form className="thirty-padding">
-                    <button onClick={event => cancelOrder(event,order.item._id)} className="cancel-button">cancel</button>
+                    {props.fixed?
+                        <></>
+                        :<button onClick={event => cancelOrder(event,order.item._id)} className="cancel-button">cancel</button>
+                    }
                 </form>
             </div>
         )
         })}
         {
             (!orders || !orders.length)? <></>
-            : <div className="purchase-list-tail"> 
-                <div><strong>Total: {total}</strong></div>
-                <button className="checkout-button" onClick={event => proceedToCheckout(event)}>Proceed to Checkout</button>
+            :<div className="purchase-list-tail"> 
+                <div id="total"><strong>Total: {total}</strong></div>
+                {props.fixed?
+                    <></>
+                    :<button className="checkout-button" onClick={event => proceedToCheckout(event)}>Proceed to Checkout</button>
+                }
             </div>
         }
         </>

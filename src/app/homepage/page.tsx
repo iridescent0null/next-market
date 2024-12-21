@@ -21,14 +21,14 @@ const Homepage = () => {
                 }
             }
             )
-        }
-        hydrate()
+        };
+        hydrate();
     },
     []
     );
 
     return <>
-        <Cart user={user} />
+        <Cart user={user} fixed={false}/>
     </>
 }
 

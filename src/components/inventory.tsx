@@ -41,3 +41,4 @@ const InventoryPart = (props: InventoryProps) => {
 }
 
 export default InventoryPart;
+export { prettyDate };
