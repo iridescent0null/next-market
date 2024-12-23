@@ -18,6 +18,7 @@ export async function DELETE(request: NextRequest, context: RequestContext) {
         await ItemModel.deleteOne({_id: params.id});
         return NextResponse.json({message: "deleted the item successfully",  id:params.id});
     } catch (err) {
+        console.error(err);
         return NextResponse.json({messaga: "failed to delete the item"});
     }
 }

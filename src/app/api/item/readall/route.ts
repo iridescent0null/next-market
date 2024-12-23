@@ -52,6 +52,7 @@ export async function GET(context?: GETContext) {
         const allItems: Item[] = await ItemModel.find();
         return NextResponse.json({message: "read all items sucessfully", items: allItems, count:count} as AllItemsMessage);
     } catch (err) {
+        console.error(err);
         return NextResponse.json({message: "failed to read all items"} as AllItemsMessage);
     }
 }

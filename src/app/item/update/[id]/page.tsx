@@ -42,7 +42,7 @@ const UpdateItem = (context: RequestContext) => {
             setCreator(itemMessage.item.email);
         };
         hydrate();
-    },[context]);
+    },[context]); // FIXME re-consider the dependency ([context] is very doubtful)
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();

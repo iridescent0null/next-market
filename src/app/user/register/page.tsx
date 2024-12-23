@@ -7,7 +7,7 @@ const Register = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => { // FIXME remove async!
         e.preventDefault();
         const response = await fetch("../../api/user/register", {
             method: "POST",

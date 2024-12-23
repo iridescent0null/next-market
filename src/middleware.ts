@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
         return response;
     } catch (err) {
         console.error(err);
-        return NextResponse.json({message: "Please sign in again (failed to check your token.)"});
+        return NextResponse.json({message: "Please sign in again (failed to check your token.)"}, {status: 401});
     }
 }
 

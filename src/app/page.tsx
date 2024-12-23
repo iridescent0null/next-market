@@ -9,7 +9,7 @@ import { ItemsMessage } from "./api/item/route";
 import { Inventory } from "./api/inventory/[id]/route";
 import { InventoriesMessage } from "./api/inventory/route";
 import InventoryPart from "@/components/inventory";
-import { CartCreationRequest } from "./api/cart/route";
+import { CartCreationMessage, CartCreationRequest } from "./api/cart/route";
 
 /** for Next's Image's loader property */
 interface ImageSource {
@@ -129,8 +129,7 @@ const ReadItemPaging = () => {
           .then(res => res.json())
           .then((message: InventoriesMessage) => {
             if (!message.message || !message.inventories) {
-              console.error(message.message);
-              throw new Error(); //TODO explain it
+              throw new Error(message.message);
             }
             // re-convert the date in strings to pure Dates
             message.inventories = message.inventories.map(
@@ -146,7 +145,7 @@ const ReadItemPaging = () => {
           })
           .then(inventories => setInventories(inventories!));      
           })
-          .catch(err=>{
+          .catch(err => {
             console.error(err);
           });
     };
@@ -169,8 +168,12 @@ const ReadItemPaging = () => {
         email: localStorage.getItem("email")
       } as CartCreationRequest)
     })
-    .then(res => {
-      alert("added to your cart");
+    .then(res => res.json())
+    .then((res: CartCreationMessage) => {
+      if (res.inserted) {
+        alert("added to your cart");
+      }
+      alert("the item was increased");
     })
     .catch(err=> console.error(err))
   }
@@ -182,6 +185,7 @@ const ReadItemPaging = () => {
         setAllItemsCount(message.count);
       });
 
+  // TODO use discontinue date
   return (
     (!itemState || itemState.length < 1)? <>loading</>:
     <>

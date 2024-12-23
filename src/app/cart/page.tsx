@@ -106,12 +106,11 @@ const Cart = (props: CartProps) => {
         return;
     }
 
-    // TODO blaim non number price
     return <> 
         {!orders? <>no items in your cart...</>
         :orders.map(order => {
-            return (
-            <div key={order.item._id} className={props.fixed? "fixed-order order" : "order"}>
+            return (Number.isNaN(Number.parseInt(order.item.price))?<div key={order.item._id} className={props.fixed? "fixed-order order" : "order"}>Error!</div> // invalid price TODO make it pretty
+            :<div key={order.item._id} className={props.fixed? "fixed-order order" : "order"}>
                 <div className="forty-padding order-main">
                     <div>title: {order.item.title}</div>
                     <div>quantity: {order.quantity}</div>

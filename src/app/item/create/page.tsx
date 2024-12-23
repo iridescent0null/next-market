@@ -24,9 +24,9 @@ const CreateItem = () => {
             body: JSON.stringify({
                 title: title,
                 price: price,
-                image: imagePath.startsWith("/")?imagePath:"/"+imagePath,
+                image: imagePath.startsWith("/")?imagePath:"/"+imagePath, // TODO accept image file, not path
                 description: description,
-                email: localStorage.getItem("email") // TODO is it safe?
+                email: localStorage.getItem("email")
             })
         })
         .then(res => res.json())

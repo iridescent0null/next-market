@@ -20,6 +20,11 @@ interface User { // temporal interface for dev
     email: string
 }
 
+interface CartCreationMessage {
+    message: string,
+    inserted: boolean
+}
+
 interface CartMessage {
     message: string,
     orders?: MaterializedOrder[],
@@ -42,6 +47,14 @@ interface MaterializedOrder { // should returned
 export async function PUT (request: NextRequest) {
     try {
         const params: CartCreationRequest = await request.json();
+
+        if (!params.item
+            || !params.quantity // 0 quantity also gets rejected
+            || !params.email
+        ) {
+            return new NextResponse("item, quantity(positive) and email are needed", {status: 400});
+        }
+
         await connectDB();
 
         const item: Item | null = await ItemModel.findById(params.item);
@@ -74,7 +87,7 @@ export async function PUT (request: NextRequest) {
             {"upsert": true}
         );
 
-        return NextResponse.json({message: "OK", number: dbResult.upsertedCount}); //TODO sophisticate
+        return NextResponse.json({message: "success", inserted:dbResult.upsertedCount > 0 } as CartCreationMessage);
     } catch (err) {
         console.error(err);
         return new NextResponse("failure", {status: 500});
@@ -87,10 +100,10 @@ export async function POST(request: NextRequest) {
 
         await connectDB();
         const users: User[] = await UserModel.find({email: params.email});
+
         if (!users || users.length < 1) {
             return new NextResponse("the user is gone", {status: 410});
         }
-
         if (users.length > 1) {
             // inconsistency!
             console.error("something very bad happens...");
@@ -128,10 +141,10 @@ export async function DELETE(request: NextRequest) {
 
         await connectDB();
         const users: User[] = await UserModel.find({email: params.email});
+        
         if (!users || users.length < 1) {
             return new NextResponse("the user is gone", {status: 410});
         }
-
         if (users.length > 1) {
             // inconsistency!
             console.error("something very bad happens...");
@@ -156,5 +169,6 @@ export async function DELETE(request: NextRequest) {
 }
 
 export type { CartMessage };
+export type { CartCreationMessage };
 export type { CartCreationRequest };
 export type { CartDeleteRequest };

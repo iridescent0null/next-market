@@ -23,11 +23,13 @@ export async function POST(request: NextRequest) {
                 $in: ids
             }
         });
-        return NextResponse.json({message: "success", items: foundItems} as ItemsMessage);
+
+        const invalidIds = ids.filter(id => foundItems.filter(item => item._id.toString() === id));
+
+        return NextResponse.json({message: "success", items: foundItems, notFound:invalidIds} as ItemsMessage);
     } catch (err) {
         console.error(err);
         return new NextResponse("failure", {status: 400});
-        // return NextResponse.json({message: "failure"})
     }
 }
 

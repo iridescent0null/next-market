@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({message: "registered a user successfully"});
     } catch (err) {
         console.error(err);
-        return NextResponse.json({message: "failed to registered a user"});
+        return NextResponse.json({message: "failed to registere a user"});
     }
 }
 

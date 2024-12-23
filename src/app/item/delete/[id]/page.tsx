@@ -46,10 +46,9 @@ const DeleteItem = (context: RequestContext) => {
             judgeYours(itemMessage.item.email === localStorage.getItem("email"));
         };
         hydrate();
-    },[context]);
+    },[context]); // FIXME re-onsider the dependency ([context] is very doubtful)
 
-    const handleSubmit = async (e: FormEvent) => {
-        
+    const handleSubmit = async (e: FormEvent) => { //FIXME remove async!
         e.preventDefault();
 
         const confirmed = confirm("are you sure to delete this item?");

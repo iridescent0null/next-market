@@ -3,7 +3,6 @@ import { getRootURL } from "@/app/utlis/config";
 import { Item, ItemMessage } from "@/app/api/item/[id]/route";
 import Image from "next/image";
 
-/** currently this function says OK when no item was found... */
 const getItem = async (id: string) => {
     return fetch(`${getRootURL()}/api/item/${id}`)
         .then(res => res.json() as Promise<ItemMessage>)
@@ -16,16 +15,17 @@ const ViewItem = async (context: RequestContext) => {
 
     await getItem(params.id)
             .then((i: ItemMessage) => {
-                item = i.item; // FIXME the fetch says OK in NOT FOUND situation and this line cannot handle it appropriately
+                item = i.item;
             })
             .catch(err => {
                 console.error(err);
                 item = undefined;
             });
     
+    //T ODO 404 or 409 when not found
     return (
         <>
-          {item? <span></span> : <h2>NOT FOUND</h2>}
+          {item? <span></span> : <h2>The Item is NOT FOUND</h2>}
           <div key={item? item._id : ""} className="item">
             <h3>{item? item.title : ""}</h3>
             <h3>{item? item.price : ""}</h3>

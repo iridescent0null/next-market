@@ -27,9 +27,18 @@ interface InventoryMessage {
     inventory?: Inventory
 }
 
-export async function PUT(request: NextRequest, context: RequestContext) { // TODO reject request without reqiured values (MongoDB doesn't do for some reason) 
+export async function PUT(request: NextRequest, context: RequestContext) {
     const urlParams: Parameter = await context.params;
     const bodyParam: InventoryCreateRequest = await request.json();
+
+    if (!urlParams.id) {
+        return new NextResponse("item id  is needed", {status: 400});
+    }
+
+    if (!Number.isInteger(bodyParam.stock) || (bodyParam.stock as number < 0)) {
+        return new NextResponse("stock number (0 or positive number) is needed", {status: 400});
+    }
+
     try {
         await connectDB();
 
@@ -49,7 +58,7 @@ export async function PUT(request: NextRequest, context: RequestContext) { // TO
 
         if (dbResult.upsertedCount < 1 && dbResult.modifiedCount < 1) {
             return NextResponse.json ({
-                message: "NOT upserted (you might input the same data)"
+                message: "NO effect (you might have input the same data)"
             } as UpsertMessage);
         }
 

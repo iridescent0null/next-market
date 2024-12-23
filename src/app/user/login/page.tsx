@@ -2,11 +2,13 @@
 
 import { FormEvent, useState } from "react";
 import { LoginResultMessage } from "@/app/api/user/login/route";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
 
     const [email,setEmail] = useState<string>("");
     const [plainPassword,setPlainPassword] = useState<string>("");
+    const router = useRouter();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -39,7 +41,7 @@ const Login = () => {
         localStorage.setItem("token", json.token);
         localStorage.setItem("email", email);
         alert("signed in successfully");
-        // TODO redirect
+        router.push(`/`);
     }
 
     return (
