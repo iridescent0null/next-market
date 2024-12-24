@@ -1,7 +1,7 @@
 "use client"
 import { FormEvent, useState } from "react";
 
-const Register = () => {
+const Register = () => { // FIXME inform user it when the registration fails
     
     const [name, setName] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -29,6 +29,7 @@ const Register = () => {
         if (response) {
             const json = await response.json();
             console.log("registered: " + json.message);
+            alert("registered!");
             return;
         }
         console.log("registered, but no response was returned");

@@ -19,8 +19,11 @@ const Login = () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                email: email,
+                email: email, // using onChange and state is very treacherous especially in automated tests!
                 password: plainPassword
+                // following blunt implementation has passed the test in chrome and firefox (webkit's one still fails...)
+                // email: (document.getElementsByName("email")[0]! as HTMLInputElement).value!, 
+                // password: (document.getElementsByName("password")[0]! as HTMLInputElement).value!,
             })
         })
         .then(res => res.json())

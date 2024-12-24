@@ -54,3 +54,11 @@ img8.png
 img9.png
 blank.png
 tart.png
+
+# playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/screenshots/*.png
