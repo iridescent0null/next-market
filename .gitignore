@@ -62,3 +62,4 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /screenshots/*.png
+demo-todo-app.spec.ts

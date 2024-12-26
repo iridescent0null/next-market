@@ -1,17 +1,17 @@
 "use client"
 
-import { FormEvent, useState } from "react";
+import { FormEvent } from "react";
 import { LoginResultMessage } from "@/app/api/user/login/route";
 import { useRouter } from "next/navigation";
 
 const Login = () => {
 
-    const [email,setEmail] = useState<string>("");
-    const [plainPassword,setPlainPassword] = useState<string>("");
     const router = useRouter();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        const email = (document.getElementById("login-email")! as HTMLInputElement).value!;
+        const plainPassword = (document.getElementById("login-password")! as HTMLInputElement).value!;
         const json: LoginResultMessage = await fetch("../api/user/login", {
             method: "POST",
             headers: {
@@ -19,11 +19,8 @@ const Login = () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                email: email, // using onChange and state is very treacherous especially in automated tests!
-                password: plainPassword
-                // following blunt implementation has passed the test in chrome and firefox (webkit's one still fails...)
-                // email: (document.getElementsByName("email")[0]! as HTMLInputElement).value!, 
-                // password: (document.getElementsByName("password")[0]! as HTMLInputElement).value!,
+                email: email, 
+                password: plainPassword,
             })
         })
         .then(res => res.json())
@@ -51,8 +48,8 @@ const Login = () => {
         <>
             <h1>Sign in</h1>
             <form onSubmit={handleSubmit}>
-                <input type="text" name="email" onChange={(e) => setEmail(e.target.value)} placeholder="your e-mail address" required/>
-                <input type="password" name="password" onChange={(e) => setPlainPassword(e.target.value)}  placeholder="your password" required />
+                <input type="text" id="login-email" name="email" placeholder="your e-mail address" required/>
+                <input type="password" id="login-password" name="password" placeholder="your password" required />
                 <button>Sign in</button>
             </form>
         </>
