@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<rss version="2.0"
+xmlns:content="http://purl.org/rss/1.0/modules/content/"
+xmlns:wfw="http://wellformedweb.org/CommentAPI/"
+xmlns:dc="http://purl.org/dc/elements/1.1/"
+xmlns:atom="http://www.w3.org/2005/Atom"
+xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+xmlns:slash="http://purl.org/rss/1.0/modules/slash/">
+
+
+<channel>
+
+	<title>[MOCK]ダミーまとめランキング</title>
+
+	<atom:link href="https://example.com/umamusume/feed" rel="self" type="application/rss+xml" />
+
+	<link>https://example/umamusume</link>
+
+	<description><![CDATA[ウマ娘まとめブログのランキングサイト。人気記事や人気まとめブログが分かる。アプリのように使いやすいウマ娘まとめアンテナサイト。※ウマ娘リーク注意]]></description>
+
+	<lastBuildDate>Fri, 27 Dec 2024 08:33:09 +0000</lastBuildDate>
+
+	<language>ja</language>
+
+	<sy:updatePeriod>hourly</sy:updatePeriod>
+
+	<sy:updateFrequency>5</sy:updateFrequency>
+
+
+
+	<item>
+
+		<title>[MOCK]【ウマ娘】義士…嘘だよな…？</title>
+
+		<link>https://example.com/umamusume/?p=524342</link>
+
+		<pubDate>Fri, 27 Dec 2024 17:53:29 +0900</pubDate>
+
+		<guid>https://example.com/umamusume/?p=524342</guid>
+
+		<description><![CDATA[<img src="/mock/rss-rankings/01.png"><a href="https://example.com/umamusume/?p=524342">[MOCK RSS]【ウマ娘】義士…嘘だよな…？</a>]]></description>
+
+		<content:encoded><![CDATA[<img src="/mock/rss-rankings/01.png"><a href="https://example.com/umamusume/?p=524342">[MOCK RSS]【ウマ娘】義士…嘘だよな…？</a>]]></content:encoded>
+
+	</item>
+
+
+
+
+	<item>
+
+		<title>[MOCK]【ウマ娘】サトノダイヤモンド vs ダイワスカーレット ※中学生</title>
+
+		<link>https://example.com/umamusume/?p=524396</link>
+
+		<pubDate>Fri, 27 Dec 2024 18:00:17 +0900</pubDate>
+
+		<guid>https://example.com/umamusume/?p=524396</guid>
+
+		<description><![CDATA[<img src="/mock/rss-rankings/02.jpg"><a href="https://example.com/umamusume/?p=524396">[MOCK RSS]【ウマ娘】サトノダイヤモンド vs ダイワスカーレット ※中学生</a>]]></description>
+
+		<content:encoded><![CDATA[<img src="/mock/rss-rankings/02.jpg"><a href="https://example.com/umamusume/?p=524396">[MOCK RSS]【ウマ娘】サトノダイヤモンド vs ダイワスカーレット ※中学生</a>]]></content:encoded>
+
+	</item>
+
+
+
+
+	<item>
+
+		<title>[MOCK]【ウマ娘】これもう絶対に別衣装マルおね来るやろ</title>
+
+		<link>https://example.com/umamusume/?p=524374</link>
+
+		<pubDate>Fri, 27 Dec 2024 17:57:38 +0900</pubDate>
+
+		<guid>https://example.com/umamusume/?p=524374</guid>
+
+		<description><![CDATA[<img src="/mock/rss-rankings/03.jpg"><a href="https://example.com/umamusume/?p=524374">[MOCK RSS]【ウマ娘】これもう絶対に別衣装マルおね来るやろ</a>]]></description>
+
+		<content:encoded><![CDATA[<img src="/mock/rss-rankings/03.jpg"><a href="https://example.com/umamusume/?p=524374">[MOCK RSS]【ウマ娘】これもう絶対に別衣装マルおね来るやろ</a>]]></content:encoded>
+
+	</item>
+
+
+
+
+	<item>
+
+		<title>[MOCK]カレンチャン、マジギレしてしまう</title>
+
+		<link>https://example.com/umamusume/?p=524427</link>
+
+		<pubDate>Fri, 27 Dec 2024 18:06:06 +0900</pubDate>
+
+		<guid>https://example.com/umamusume/?p=524427</guid>
+
+		<description><![CDATA[<img src="/mock/rss-rankings/04.jpg"><a href="https://example.com/umamusume/?p=524427">[MOCK RSS]カレンチャン、マジギレしてしまう</a>]]></description>
+
+		<content:encoded><![CDATA[<img src="/mock/rss-rankings/04.jpg"><a href="https://example.com/umamusume/?p=524427">[MOCK RSS]カレンチャン、マジギレしてしまう</a>]]></content:encoded>
+
+	</item>
+
+
+
+
+	<item>
+
+		<title>[MOCK]【競馬】ドウデュース、社台SSでの馬房がオルフェーヴルとイクイノックスの間と判明！【ウマ娘民の反応】</title>
+
+		<link>https://example.com/umamusume/?p=524385</link>
+
+		<pubDate>Fri, 27 Dec 2024 17:59:47 +0900</pubDate>
+
+		<guid>https://example.com/umamusume/?p=524385</guid>
+
+		<description><![CDATA[<img src=""><a href="https://example.com/umamusume/?p=524385">[MOCK RSS]【競馬】ドウデュース、社台SSでの馬房がオルフェーヴルとイクイノックスの間と判明！【ウマ娘民の反応】</a>]]></description>
+
+		<content:encoded><![CDATA[<img src=""><a href="https://example.com/umamusume/?p=524385">[MOCK RSS]【競馬】ドウデュース、社台SSでの馬房がオルフェーヴルとイクイノックスの間と判明！【ウマ娘民の反応】</a>]]></content:encoded>
+
+	</item>
+
+
+
+
+</channel>
+
+
+</rss>

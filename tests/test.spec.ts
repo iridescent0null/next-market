@@ -58,3 +58,10 @@ test("cast dummy item into cart", async ({ page }, info) => { // TODO resolve th
   await expect(page.getByRole("button", {name: "Proceed to Checkout"})).toBeVisible();
   await page.screenshot({path: "./screenshots/"+info.project.name+".png", fullPage: true});
 });
+
+test("subscribe RSS feed", async ({ page }, info) => {
+  await page.goto("/rss?mocked=true");
+  await page.screenshot({path: "./screenshots/rss/"+info.project.name+".png", fullPage: true});
+  await expect(page.getByText("MOCK RSS")).toHaveCount(5);
+  await page.screenshot({path: "./screenshots/rss/"+info.project.name+".png", fullPage: true}); // incluing thubmnails or not is under a race condition in rendering
+})

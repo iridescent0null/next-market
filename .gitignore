@@ -54,6 +54,8 @@ img8.png
 img9.png
 blank.png
 tart.png
+/public/mock/rss-rankings/*.png
+/public/mock/rss-rankings/*.jpg
 
 # playwright
 node_modules/
@@ -62,4 +64,5 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /screenshots/*.png
+/screenshots/rss/*.png
 demo-todo-app.spec.ts
