@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "livedoor.blogimg.jp",
       },
+      {
+        protocol: "https",
+        hostname: "agemasen.com",
+      },
     ],
   },
 };

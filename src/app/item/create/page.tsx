@@ -5,33 +5,26 @@ import { useRouter } from "next/navigation";
 import { IdMessage } from "@/app/api/item/create/route";
 
 const CreateItem = () => {
-    const [title,setTitle] = useState<string>("");
-    const [price,setPrice] = useState<string>("");
-    const [imagePath,setImagePath] = useState<string>("");
-    const [description,setDescription] =useState<string>("");
+    const [reuse,setReuse] = useState<boolean>(false);
 
     const router = useRouter();
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+
         fetch(`${getRootURL()}api/item/create`,{
             method: "POST",
             headers: {
                 "Accept": "application/json",
-                "Content-Type": "application/json",
+                // "Content-Type": "multipart/form-data",　　// should not be declared manually! (i causes failure to add boundary info)
                 "Authorization": "Bearer" + " " + localStorage.getItem("token")
             },
-            body: JSON.stringify({
-                title: title,
-                price: price,
-                image: imagePath.startsWith("/")?imagePath:"/"+imagePath, // TODO accept image file, not path
-                description: description,
-                email: localStorage.getItem("email")
-            })
+            body: formData
         })
         .then(res => res.json())
         .then((json: IdMessage) => {
-            alert("result: " + json.message + ", " + (json.id || ""));
+            alert("result: " + json.message + (json.id?  ", " + json.id: ""));
             if (!json.id) {
                 return;
             }
@@ -45,11 +38,15 @@ const CreateItem = () => {
     return (
         <>
             <h2>Item Registration</h2>
+            <input type="checkbox" onChange={(e) => {setReuse(e.target.checked)}}/> reuse an image on the server 
             <form onSubmit={handleSubmit}>
-                <input type="text" name="title" onChange={(e) => setTitle(e.target.value)} placeholder="title shown in the page" required/>
-                <input type="text" name="price" onChange={(e) => setPrice(e.target.value)} placeholder="price in US dollar"  required/>
-                <input type="text" name="image" onChange={(e) => setImagePath(e.target.value)} placeholder="path of the product image" required/>
-                <textarea name="description" onChange={(e) => setDescription(e.target.value)} rows={15} placeholder="description" required/> 
+                <input type="text" name="title" placeholder="title shown in the page" required/>
+                <input type="text" name="price" placeholder="price in US dollar" required/>
+                <textarea name="description" rows={15} placeholder="description" required/> 
+                {reuse?
+                    <input type="text" name="image" placeholder="item id which shares the image" required/>
+                    :<input type="file" name="imageFile" id="imageFile" required/>
+                }
                 <button>Create!</button>
             </form>
         </>

@@ -14,6 +14,7 @@ interface Article {
 
 const srcURLRegex = /(?<=(src=\"))[^><]*(?=\")/;
 
+// FIXME cors error
 const RSS = () => {
     const [articles,setArticles] = useState<Article[]>();
     const parser = new Parser();

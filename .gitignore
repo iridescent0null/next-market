@@ -56,6 +56,9 @@ blank.png
 tart.png
 /public/mock/rss-rankings/*.png
 /public/mock/rss-rankings/*.jpg
+Tyrannosaurus.png
+dinosaur_ceratosaurus.png
+/public/item/*/*.png
 
 # playwright
 node_modules/
