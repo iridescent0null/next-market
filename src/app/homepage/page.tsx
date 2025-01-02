@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Cart from "../cart/page"
 import { getCookie } from 'cookies-next';
+import HistoryPart from "@/components/history";
 
 interface User {
     email: string
@@ -16,7 +17,7 @@ const Homepage = () => {
 
             Promise.resolve(email).then(email =>{
                 if(email) {
-                    setUser({email:email});
+                    setUser({email: email});
                 }
             }
             )
@@ -27,10 +28,13 @@ const Homepage = () => {
     []
     );
 
-    // webkit's test fails without the lousy default value 
-    // TODO resolve it!
     return <>
-        <Cart user={user.email?user: {email: localStorage.getItem("email")!}} fixed={false}/> 
+        {!user.email?<></>
+            :<Cart user={user} fixed={false}/> 
+        }
+        {!user.email?<></>
+            :<HistoryPart user={user}/> 
+        }
     </>
 }
 

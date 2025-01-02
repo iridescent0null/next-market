@@ -13,4 +13,9 @@ const connectDB = async () => {
     }
 };
 
+const connectDBForTransaction = async () => {
+    return await mongoose.createConnection(URL).asPromise();
+};
+
 export default connectDB;
+export { connectDBForTransaction };

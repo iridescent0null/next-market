@@ -36,8 +36,8 @@ export default defineConfig({
   * Permit lousy performance because of the resource shortage in dev environment.
   * First session after server starting sometimes takes lengthy time.
   */
-  timeout: 60_000,
-  expect: { timeout: 30_000},
+  timeout: 90_000,
+  expect: { timeout: 60_000},
 
   /* Configure projects for major browsers */
   projects: [

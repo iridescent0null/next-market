@@ -9,6 +9,11 @@ const login = async ({ page } :any, name: string) => { // can be contained in be
   await expect(page.getByText("Available Products")).toBeVisible();
 }
 
+const prettyToday = () => { // mocking the parsing in the "prettyDate()"
+  const date = new Date();
+  return date.getFullYear() + "/" +(date.getMonth()+1) + "/" + date.getDate();
+};
+
 test.beforeEach (async ({ page }) => {
   page.on('dialog', dialog => {
     console.log(dialog.message());
@@ -54,9 +59,22 @@ test("cast dummy item into cart", async ({ page }, info) => { // TODO resolve th
   await expect(page.getByText("Available Products")).toBeVisible({visible:false});
   await page.screenshot({path: "./screenshots/"+info.project.name+".png", fullPage: true});
 
-  await expect(page.getByText(/Total\:.*/)).toBeVisible();
+  await expect(page.getByText(/Total\:.*/).first()).toBeVisible();
   await expect(page.getByRole("button", {name: "Proceed to Checkout"})).toBeVisible();
   await page.screenshot({path: "./screenshots/"+info.project.name+".png", fullPage: true});
+
+  await page.getByRole("button", {name: "Proceed to Checkout"}).first().click();
+
+  await page.getByPlaceholder("like 000-0000").fill("test-zip")
+      .then(()=>page.getByPlaceholder("address to deliver").fill("Tokyo Chiyoda 1-1"))
+      .then(()=>page.getByRole("button", {name: "Order!"}).click()); // FIXME webkit and chromium sometimes fail to pass
+  await page.screenshot({path: "./screenshots/"+info.project.name+"_order"+".png", fullPage: true});
+
+  await page.getByRole("button", {name: "Cart"}).first().click();
+  await page.screenshot({path: "./screenshots/"+info.project.name+"_order"+".png", fullPage: true});
+
+  await expect(page.getByText(prettyToday() ,{exact: false}).first()).toBeVisible(); // TODO check the shipment id
+  await page.screenshot({path: "./screenshots/"+info.project.name+"_order"+".png", fullPage: true});
 });
 
 test("subscribe RSS feed", async ({ page }, info) => {

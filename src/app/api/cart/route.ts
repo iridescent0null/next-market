@@ -1,5 +1,5 @@
 import connectDB from "@/app/utlis/database";
-import { Schema } from "mongoose";
+import { Schema, Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { Item } from "../item/[id]/route";
 import { ItemModel, OrderModel, UserModel } from "@/app/utlis/schemaModels";
@@ -17,7 +17,12 @@ interface CartDeleteRequest {
 
 interface User { // temporal interface for dev
     _id: Schema.Types.ObjectId,
-    email: string
+    email: string,
+    option?: Option
+}
+
+interface Option {
+    shipments: undefined | Types.ObjectId[]
 }
 
 interface CartCreationMessage {
@@ -34,17 +39,20 @@ interface CartMessage {
 interface OrderInMongo { // in DB
     item: string,
     quantity: number,
-    user: string
+    user: string,
+    _id: Types.ObjectId,
+    shipment?: Types.ObjectId
 }
 
 interface MaterializedOrder { // should returned
+    _id: Types.ObjectId,
     item: Item,
     quantity: number,
-    user: string
+    user: string,
+    shipment?: Types.ObjectId
 }
 
-
-export async function PUT (request: NextRequest) {
+export async function PUT (request: NextRequest) {　// this function doesn't have idempotency...
     try {
         const params: CartCreationRequest = await request.json();
 
@@ -77,7 +85,8 @@ export async function PUT (request: NextRequest) {
         const dbResult = await OrderModel.updateOne(
             {
                 "item": params.item,
-                "user": users[0]
+                "user": users[0],
+                "shipment": undefined
             },
             {
                 $inc: {
@@ -110,7 +119,18 @@ export async function POST(request: NextRequest) {
             throw new Error();
         }
 
-        const retrievedOrders: OrderInMongo[] = await OrderModel.find({user: users[0]});
+        const queryObject = (!params.option || !params.option.shipments)?
+            {shipment: undefined}
+            :(params.option.shipments.length < 1)? 
+                {} // TODO show the meaning of the empty object
+                :{shipment: {$in: params.option.shipments}};
+
+        const retrievedOrders: OrderInMongo[] = await OrderModel.find(
+            {
+                ...queryObject,
+                user: users[0]._id
+            }
+        );
 
         const ids = retrievedOrders.map(order => order.item)
         const foundItems: Item[] = await ItemModel.find({
@@ -121,14 +141,15 @@ export async function POST(request: NextRequest) {
 
         const filledOrders = retrievedOrders.map(order => { 
             return {
+                _id: order._id,
                 item: foundItems.find(item => item._id.toString() === order.item.toString()),
                 quantity: order.quantity,
-                user: order.user
+                user: order.user,
+                shipment: order.shipment
             } as MaterializedOrder
         });
 
         return NextResponse.json({message: "success", orders:filledOrders} as CartMessage);
-
     } catch (err) {
         console.log(err);
         return new NextResponse("failure", {status: 500});
@@ -172,3 +193,5 @@ export type { CartMessage };
 export type { CartCreationMessage };
 export type { CartCreationRequest };
 export type { CartDeleteRequest };
+export type { MaterializedOrder };
+export type { User };

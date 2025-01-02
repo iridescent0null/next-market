@@ -3,8 +3,11 @@ import { SyntheticEvent, useEffect, useState } from "react";
 import { getRootURL } from "./../utlis/config";
 import { CartDeleteRequest, CartMessage } from "../api/cart/route";
 import { Item } from "../api/item/[id]/route";
+import { useRouter } from "next/navigation";
+import { Types } from "mongoose";
 
 interface Order {
+    _id: Types.ObjectId,
     item: Item,
     quantity: number,
     user: string
@@ -22,9 +25,11 @@ const Cart = (props: CartProps) => {
     const [total, setTotal] = useState<number>(0);
     const [modified, setModified] = useState<boolean>(false);
 
+    const router = useRouter();
+
     useEffect(() => {
         const hydrate = () => { 
-            const email = props.user.email;
+            const email = props.user?.email;
             if (!email) {
                 return;
             }
@@ -101,13 +106,13 @@ const Cart = (props: CartProps) => {
 
     const proceedToCheckout = (event: SyntheticEvent) => {
         event.preventDefault();
-        alert("implementing...");
-        console.log(event);
+        //TODO check?
+        router.push("/checkout");
         return;
     }
 
     return <> 
-        {!orders? <>no items in your cart...</>
+        {(!orders || orders.length < 1)? <>no items in your cart...</>
         :orders.map(order => {
             return (Number.isNaN(Number.parseInt(order.item.price))?<div key={order.item._id} className={props.fixed? "fixed-order order" : "order"}>Error!</div> // invalid price TODO make it pretty
             :<div key={order.item._id} className={props.fixed? "fixed-order order" : "order"}>

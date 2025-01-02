@@ -60,16 +60,79 @@ const OrderSchema = new Schema({
     quantity: {
         type: Number,
         required: true
+    },
+    shipment: {
+        type: Schema.Types.ObjectId,
+        ref: "Shipment"
     }
 });
 
 OrderSchema.index(
-    {user: 1, item: 1},
+    {user: 1, item: 1, shipment: 1},
     {unique: true}
 );
 
+const ShipmentSchema = new Schema({
+    user: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "User"  
+    },
+    address: {
+        type: String,
+        required: true
+    },
+    zip: {
+        type: String,
+        required: true  
+    },
+    totalInCents: {
+        type: Number,
+        required: true
+    },
+    orderDate: {
+        type: Date,
+        required: true
+    },
+    expectedArrival: {
+        type: Date,
+        required: true
+    },
+    phase: { 
+        type: Number,
+        require: true,
+        default: 0 // 0: just ordered, 1: in process, 2: shipped, 3: canneled, 4: suspended, 5: recieved
+    },
+    arrival: {
+        type: Date 
+    },
+    note: {
+        type: String
+    }
+});
+
+//TODO remove me (it's worked out, the page is already not dependent on it)
+const ShipmentOrderRelationSchema = new Schema({
+    shipment: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Shipment"   
+    },
+    order: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Order"  
+    }
+});
+
+ShipmentOrderRelationSchema.index(
+    {user: 1, item: 1},
+    {unique: true}
+);
 
 export const ItemModel = mongoose.models.Item || mongoose.model("Item", ItemSchema); // what's the former??
 export const UserModel = mongoose.models.User || mongoose.model("User", UserSchema);
 export const InventoryModel = mongoose.models.Inventory || mongoose.model("Inventory", InventorySchema);
 export const OrderModel = mongoose.models.Order || mongoose.model("Order" , OrderSchema);
+export const ShipmentModel = mongoose.models.Shipment || mongoose.model("Shipment", ShipmentSchema);
+export const ShipmentOrderRelationModel = mongoose.models.ShipmentOrderRelation || mongoose.model("ShipmentOrderRelation", ShipmentOrderRelationSchema);

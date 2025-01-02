@@ -241,8 +241,41 @@ input[type=number] {
   text-align: center;
 }
 
+.order-button-note {
+  padding-left: 20%;
+  padding-right: 20%;
+}
+
 .uma-rss-article {
   padding: 30px;
   border-top: 1px solid gray;
   border-bottom: 1px solid gray;
+}
+
+.shipment {
+  margin: 20px;
+  background-color: navajowhite;
+  border: 1px;
+  border-color: darkorange;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.shipment .order {
+  display: block;
+}
+
+.shipment .order .row {
+  border-top: 1px gray solid;
+  border-bottom: 1px gray solid;
+  padding-left: 30px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.shipment .order .row a {
+  color: white;
+  text-decoration: none; 
 }
