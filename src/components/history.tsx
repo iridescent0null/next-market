@@ -12,16 +12,18 @@ interface HistoryProps {
     }
 }
 
-interface ShipmentInfo {
+interface ShipmentOrderRelation {
     shipment: Types.ObjectId,
     orders: MaterializedOrder[]
 }
 
 const HistoryPart = (props: HistoryProps) => {
-    const [shipments,setShipments] = useState<ShipmentInfo[]>([]);
-    const [shipmentDetails,setShipmentDetails] = useState<Shipment[]>([]);
+    const [shipmentOrderRelations,setShipmentOrderRelations] = useState<ShipmentOrderRelation[]>([]);
+    const [shipments,setShipments] = useState<Shipment[]>([]);
 
-    let unordered: ShipmentInfo[]; // temporary save area used in the lengthy promise chain
+    // temporary save area used in the lengthy promise chain
+    let unorderedRelation: ShipmentOrderRelation[];
+
     useEffect(() => {
         const hydrate = () => {
             fetch(`${getRootURL()}api/cart`, {
@@ -42,7 +44,8 @@ const HistoryPart = (props: HistoryProps) => {
                 const orderSet = new Set<Types.ObjectId>();
                 orders.forEach(order => orderSet.add(order.shipment!))
 
-                unordered = Array.from(orderSet).filter(id=>id).map(id => {
+                // cannot sort it yet here, then just save 
+                unorderedRelation = Array.from(orderSet).filter(id=>id).map(id => {
                     return {
                         shipment:id,
                         orders: !id? [] : orders.filter(order => order && order.shipment && order.shipment.toString() === id.toString())
@@ -65,15 +68,26 @@ const HistoryPart = (props: HistoryProps) => {
             })
             .then(res => res.json())
             .then((message: ShipmentMessage) => {
-                const shipmentDetailsHere = message.shipments!;
-                setShipmentDetails(shipmentDetailsHere);
+                const shipmentsHere = message.shipments!;
 
-                setShipments(
-                    unordered.sort((a,b) => {
+                unorderedRelation.filter(
+                    relation => !shipmentsHere.find(detail => detail._id?.toString() === relation.shipment?.toString())
+                )
+                .forEach(relation => {
+                    console.error("orders with a shipment miss the shipment!: ");
+                    alert("Please contanct customer service: Shipment Information is missing, id:" + relation.shipment);
+                    console.warn({shipment:relation.shipment,id:relation.orders.map(order=>order._id)});
+                });
+
+                setShipments(shipmentsHere);
+                setShipmentOrderRelations(
+                    // finally sort it based on order date (newer to older)
+                    unorderedRelation
+                        .sort((a,b) => {
                         return 0 -
-                        new Date(shipmentDetailsHere.find(detail => detail._id?.toString() === a.shipment?.toString())!.orderDate).getTime()
+                        new Date(shipmentsHere.find(detail => detail._id?.toString() === a.shipment?.toString())!.orderDate).getTime()
                         +
-                        new Date(shipmentDetailsHere.find(detail => detail._id?.toString() === b.shipment?.toString())!.orderDate).getTime()
+                        new Date(shipmentsHere.find(detail => detail._id?.toString() === b.shipment?.toString())!.orderDate).getTime();
                     })
                 );
             });
@@ -83,7 +97,7 @@ const HistoryPart = (props: HistoryProps) => {
     []
     );
 
-    const parseShipment = (shipment:Shipment) =>{
+    const parseShipment = (shipment: Shipment) =>{
         if (!shipment) {
             return <></>;
         }
@@ -93,7 +107,7 @@ const HistoryPart = (props: HistoryProps) => {
             <div>Arrival: {prettyDate(shipment.arrival? shipment.arrival.toString():shipment.expectedArrival?.toString())}</div>
             <div>Status: {parsePhase(shipment.phase)}</div>
         </>;
-    }
+    };
 
     const parsePhase = (phase: ShipmentPhase) =>  {
         return (phase === 0)? "just ordered"
@@ -106,17 +120,17 @@ const HistoryPart = (props: HistoryProps) => {
     }
 
     return <>
-        <>{shipments.map(shipment => 
-            <div className="shipment" key={shipment.shipment?.toString()}>
-                <div>Shipment id: {shipment.shipment?.toString()}</div>
+        <>{shipmentOrderRelations.map(relation => 
+            <div className="shipment" key={relation.shipment?.toString()}>
+                <div>Shipment id: {relation.shipment?.toString()}</div>
                 <div className="minor-note">Please tell the id to the operator in inquiry</div>
-                {shipment.orders.map(order => <div className="order">
+                {relation.orders.map(order => <div className="order">
                     <div className="row">Product Name: <Link href={`/item/${order.item._id}`}><strong>{order.item.title}</strong></Link></div>
                     <div className="row">Price: ${order.item.price}</div>
                     <div className="row">Quintity: {order.quantity}</div>
                     <div className="row minor-note">{order.item.description}</div>
                 </div>)}
-                <>{parseShipment(shipmentDetails.find(detail => detail._id?.toString() === shipment.shipment?.toString())!)}</>
+                <>{parseShipment(shipments.find(sm => sm._id?.toString() === relation.shipment?.toString())!)}</>
             </div>
         )}</>
     </>;

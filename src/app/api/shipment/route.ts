@@ -1,5 +1,5 @@
 import { Order } from "@/app/cart/page";
-import { connectDBForTransaction } from "@/app/utlis/database";
+import connectDB, { connectDBForTransaction } from "@/app/utlis/database";
 import { OrderModel, ShipmentModel, UserModel } from "@/app/utlis/schemaModels";
 import { ClientSession, Connection, Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -23,6 +23,10 @@ interface ShipmentRetrieveRequest {
     email: string
 }
 
+interface ShipmentDeleteRequest {
+    id: string
+}
+
 interface Shipment {
     _id?: Types.ObjectId,
     user: Types.ObjectId,
@@ -44,11 +48,6 @@ interface ShipmentMessage {
     shipments?: Shipment[]
 }
 
-// interface ShipmentOrderRelation {
-//     shipment: Types.ObjectId,
-//     order: Types.ObjectId
-// }
-// 
 interface User { 
     _id: Types.ObjectId,
     email: string
@@ -140,6 +139,34 @@ export async function POST (request: NextRequest) {
         if (db) {
             db.close();
         }
+    }
+}
+
+/**
+ * DO NOT LET USERS CALL THIS \
+ * Delete the purchase history. This is an exceptional operation only 
+ * for managing unexpected errors or development.
+ * @param request designatin the id of the shipment
+ * @returns NextResponse which just shows scceeded or not
+ */
+export async function DELETE(request: NextRequest) {
+    // FIXME authenticate and reject him if the caller is not a listed administrator
+    try {
+        const params: ShipmentDeleteRequest = await request.json();
+
+        await connectDB();
+        const result = await ShipmentModel.deleteOne(
+            {
+                _id: new Types.ObjectId(params.id)
+            }
+        );
+
+        console.log("history deleted: acknowledged," + result.acknowledged + "; deleteCount, "+result.deletedCount);
+        return NextResponse.json({message: "success"});
+    
+    } catch (err) {
+        console.error(err);
+        return NextResponse.json({message: "error"}, {status: 500});
     }
 }
 

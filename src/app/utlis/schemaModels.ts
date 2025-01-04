@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Query, Types } from "mongoose";
 
 const Schema = mongoose.Schema;
 
@@ -111,7 +111,25 @@ const ShipmentSchema = new Schema({
     }
 });
 
-//TODO remove me (it's worked out, the page is already not dependent on it)
+ShipmentSchema.pre("deleteOne", async function(next) {
+    // delete orders which linked with the shipment to be deleted
+
+    // horribly complicated type copied from the editor... (seems to work out)
+    const query: Query<unknown, unknown, unknown, unknown, "find", Record<string, never>> = this; 
+
+    const result = await OrderModel.deleteMany({
+        shipment: new Types.ObjectId(query.getQuery()._id as string)
+    })
+
+    if (result.deletedCount < 1) {
+        console.error(result);
+        throw new Error("failed to delete orders!");
+    }
+
+    console.log("cascade delete result: acknowledged," + result.acknowledged +"; deleteCount, "+result.deletedCount);
+    next();
+});
+
 const ShipmentOrderRelationSchema = new Schema({
     shipment: {
         type: Schema.Types.ObjectId,
