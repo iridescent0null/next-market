@@ -14,8 +14,20 @@ interface IdMessage {
 
 const imageFolderName = "public/item/";
 
+const parseEmailHeader = (headerValue: string | null) => {
+    const regex  = /(?<=\=).*/;
+    const regexResult = headerValue? headerValue.match(regex) : null;
+    if (!regexResult) {
+        throw new Error("invalid input as email "+ headerValue);
+    }
+
+    return regexResult[0].replace("%40","@");
+};
+
 export async function POST(request: NextResponse) {
     const formData = await request.formData();
+
+    const email = parseEmailHeader(request.headers.get("cookie"));
 
     // there are two ways to give the image
     const imageSrcItem = formData.get("image"); // existed item which provides the new item with its image 
@@ -60,13 +72,13 @@ export async function POST(request: NextResponse) {
             image: image,
             price: formData.get("price"),
             description: formData.get("description"),
-            email: request.headers.get("email")
+            email: email
         });
         return NextResponse.json({message: "item was created successfully", id: item._id.toString()});
     }
     catch(err)  {
         console.error(err);
-        return NextResponse.json({message: "failure to create an item"});
+        return NextResponse.json({message: "failure to create an item"}, {status: 500});
     }
 }
 
