@@ -70,6 +70,7 @@ const HistoryPart = (props: HistoryProps) => {
             .then((message: ShipmentMessage) => {
                 const shipmentsHere = message.shipments!;
 
+                // detect orphan orders
                 unorderedRelation.filter(
                     relation => !shipmentsHere.find(detail => detail._id?.toString() === relation.shipment?.toString())
                 )

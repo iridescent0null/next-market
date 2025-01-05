@@ -17,7 +17,7 @@ const CreateItem = () => {
             method: "POST",
             headers: {
                 "Accept": "application/json",
-                // "Content-Type": "multipart/form-data",　　// should not be declared manually! (i causes failure to add boundary info)
+                // "Content-Type": "multipart/form-data",　　// should not be declared manually! (it causes failure to add boundary info)
                 "Authorization": "Bearer" + " " + localStorage.getItem("token")
             },
             body: formData

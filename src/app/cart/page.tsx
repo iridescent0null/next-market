@@ -88,7 +88,6 @@ const Cart = (props: CartProps) => {
             },
             body: JSON.stringify({
                 item: itemId as any, 
-                // item: "674c3cd31423e04e6b52aca5" as any, // to cause intentional error (NEVER commit the source not in comment!) //TODO adopt a more solid way...
                 email: props.user.email
               } as CartDeleteRequest)
         })
