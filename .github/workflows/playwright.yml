@@ -1,4 +1,4 @@
-# TODO flankly i don't know this file use...
+# TODO frankly i don't know this file use...
 name: Playwright Tests
 on:
   push:
@@ -18,8 +18,9 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
+    # this app is not accessible from Github yet
+    # - name: Run Playwright tests 
+    #   run: npx playwright test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
