@@ -7,7 +7,10 @@ const ItemSchema = new Schema({
     image: String, 
     price: String,
     description: String,
-    email: String
+    email: {
+        type: String,
+        required: true    
+    }
 });
 
 const UserSchema = new Schema({
