@@ -5,6 +5,7 @@ import { ClientSession, Connection, Types } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 type Mode = "checkout" | "retrieve";
+type DeleteMode = "single" | "multi" | "duration";
 
 interface ShipmentRequest {
     mode: "checkout",
@@ -23,9 +24,34 @@ interface ShipmentRetrieveRequest {
     email: string
 }
 
-interface ShipmentDeleteRequest {
+interface SingleShipmentDeleteRequest {
+    mode: "single",
     id: string
 }
+
+interface MultiShipmentDeleteRequest { //no implemented yet
+    mode: "multi",
+    ids: string[]
+}
+
+interface DurationShipmentDeleteRequest {
+    mode: "duration",
+    startIncluded: string,
+    endExcluded: string,
+    limitation: number
+}
+
+interface Document {
+    _id: string
+}
+
+interface ShipmentBulkDeletionResponse {
+    message: string,
+    deleted: number,
+    failed: string[]
+}
+
+type ShipmentDeleteRequest = SingleShipmentDeleteRequest | MultiShipmentDeleteRequest | DurationShipmentDeleteRequest;
 
 interface Shipment {
     _id?: Types.ObjectId,
@@ -65,7 +91,7 @@ export async function POST (request: NextRequest) {
                 throw Error("inconsistency");
             }
             if (users.length < 1) {
-                return NextResponse.json({message: "the user is gone"}, {status: 409});
+                return NextResponse.json({message: "the user is gone"}, {status: 410});
             }
             const shipments: Shipment[] = await ShipmentModel.find(
                 {
@@ -146,22 +172,87 @@ export async function POST (request: NextRequest) {
  * DO NOT LET USERS CALL THIS \
  * Delete the purchase history. This is an exceptional operation only 
  * for managing unexpected errors or development.
- * @param request designatin the id of the shipment
+ * @param request designatin the shipment(s)
  * @returns NextResponse which just shows scceeded or not
  */
 export async function DELETE(request: NextRequest) {
-    // FIXME authenticate and reject him if the caller is not a listed administrator
+
+    let publicized = false; // make true and rebuild the project only when this function is needed!
+    if (!publicized) {
+        return NextResponse.json("",{status: 404});
+    }
+
     try {
         const params: ShipmentDeleteRequest = await request.json();
 
         await connectDB();
+
+        if (params.mode === "multi") {
+            // TODO 
+            return NextResponse.json({message: "not supported yet"}, {status: 400});
+        }
+
+        if (params.mode === "duration") {
+            if (!params.limitation) {
+                if (params.limitation < 0) {
+                    return NextResponse.json({message: "you should enter positive number limitation (if you declare it as 10, only 10 or less history and these related orders will get deleted.)"},
+                         {status: 400});
+                }
+                console.warn("bulk shipment deletion with limitation zero was requested. It technically means dry run.");
+            }
+
+            const obj =  {
+                orderDate: {
+                    $gt: new Date(params.startIncluded),
+                    $lt: new Date(params.endExcluded)
+            }};
+            const shipments: Document[] = await ShipmentModel.find(
+                obj 
+            );
+
+            if (shipments.length < 1) {
+                return NextResponse.json({message: `there is no shipment in the duration`}, {status: 200});
+            }
+
+            if (shipments.length > params.limitation) {
+                return NextResponse.json({message: `No shipment deleted. your limitation, ${params.limitation}; the number of shipment found, ${shipments.length}`}, {status: 200});
+            }
+
+            console.warn("bulk shipment deletion start. items: " + shipments.length);
+            let deleted = 0;
+            const failure: Document[] = [];
+            for (let i = 0; i < shipments.length ; i++) {
+                const result = await ShipmentModel.deleteOne(
+                    {
+                        _id: new Types.ObjectId(shipments[i]._id)
+                    }
+                );
+                if (result.deletedCount > 0) {
+                    deleted += result.deletedCount;
+                    continue;
+                }
+                failure.push(shipments[i]);    
+            }
+
+            if (failure.length > 0) {
+                if (deleted < 1) {
+                    console.error("bulk shipment deletion failed!");
+                    return NextResponse.json({message: "no shipment was deleted by internal errors", deleted: deleted, failed: failure.map(shipment=> shipment._id)} as ShipmentBulkDeletionResponse,  {status: 500});
+                }
+                console.error(`bulk shipment deletion failed to complete. deleted: ${deleted}, failed: ${failure}`);
+                return NextResponse.json({message: "failed to complete", deleted: deleted, failed: failure.map(shipment => shipment._id) } as ShipmentBulkDeletionResponse,  {status: 500});
+            }
+            console.warn("purchase history deleted: " + shipments.map(shipment=> shipment._id));
+            return NextResponse.json({message: "success", deleted: deleted, failed: []} as ShipmentBulkDeletionResponse);
+        }
+
         const result = await ShipmentModel.deleteOne(
             {
                 _id: new Types.ObjectId(params.id)
             }
         );
 
-        console.log("history deleted: acknowledged," + result.acknowledged + "; deleteCount, "+result.deletedCount);
+        console.warn("purchase history deleted: acknowledged, " + result.acknowledged + "; deleteCount, "+result.deletedCount);
         return NextResponse.json({message: "success"});
     
     } catch (err) {
