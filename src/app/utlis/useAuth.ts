@@ -42,3 +42,4 @@ const isCurrentUser = async (emailOfItem: string) => {
 };
 
 export { isCurrentUser };
+export type { BooleanMessage };

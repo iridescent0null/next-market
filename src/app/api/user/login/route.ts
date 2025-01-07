@@ -3,7 +3,7 @@ import connectDB from "@/app/utlis/database";
 import { UserModel } from "@/app/utlis/schemaModels";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
-import Config from "@/app/utlis/config";
+import Config, { getRootURL } from "@/app/utlis/config";
 import { UserInput } from "../register/route";
 
 type NullableRetrievedUser = {
@@ -51,6 +51,9 @@ export async function POST(request: NextRequest) {
         const token = await new SignJWT(payload)
                 .setProtectedHeader({alg: "HS256"})
                 .setExpirationTime("1d")
+                .setIssuedAt("-1d")
+                .setAudience(getRootURL())
+                .setIssuer(getRootURL())
                 .sign(secretKey);
 
         return NextResponse.json({message: "signed in successfully", token: token});  

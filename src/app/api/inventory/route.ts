@@ -11,6 +11,11 @@ interface InventoriesMessage {
 }
 
 export async function POST(request: NextRequest) {
+    const requestShadowText = await request.clone().text();
+    if (requestShadowText.length < 1) {
+        console.warn("blank request for inventory post!");
+        return NextResponse.json({message: "blank request"}, {status: 400});
+    }
     try {
         const ids: readonly string[] = (await request.json()).ids;
         await connectDB();
@@ -24,7 +29,7 @@ export async function POST(request: NextRequest) {
         const foundItemIds: Types.ObjectId[] = foundInventories.map(inventory => inventory.item as unknown as Types.ObjectId) ;
         const notFoundInventories = ids.filter(id => foundItemIds.find(foundItemIdsId => foundItemIdsId.toString() === id));
 
-        return NextResponse.json({message: "success", inventories:foundInventories, invalidIds:notFoundInventories} as InventoriesMessage);
+        return NextResponse.json({message: "success", inventories: foundInventories, invalidIds: notFoundInventories} as InventoriesMessage);
     } catch (err) {
         console.error(err);
         return NextResponse.json({message: "falilure"} as InventoriesMessage);

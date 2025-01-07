@@ -4,8 +4,8 @@ import { FormEvent, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IdMessage } from "@/app/api/item/create/route";
 import { getItem } from "../../[id]/page";
-import RequestContext, { ItemMessage } from "@/app/api/item/[id]/route";
-import { isCurrentUser } from "@/app/utlis/useAuth";
+import RequestContext, { Item, ItemMessage } from "@/app/api/item/[id]/route";
+import { BooleanMessage, isCurrentUser } from "@/app/utlis/useAuth";
 
 /** this page rejects accesses from the others than the items owner (update page accept those) */
 const DeleteItem = (context: RequestContext) => {
@@ -19,36 +19,44 @@ const DeleteItem = (context: RequestContext) => {
     const router = useRouter();
 
     useEffect(() => {
-        const hydrate = async () => {
-            const params = await context.params;
-            const itemMessage = await getItem(params.id) as ItemMessage;
+        const hydrate = () => {
+            let _item: Item;
+            context.params
+            .then(params => getItem(params.id))
+            .then((message: ItemMessage) => {
+                const item = message.item;
+                if (!item) {
+                    alert("item not found");
+                    throw new Error();
+                }
+                _item = item; 
+                return item;
+            })
+            .then(item => isCurrentUser(item.email))
+            .then((message: BooleanMessage) => message.result)
+            .then(isYours=>{
+                if(!isYours) {
+                    alert("You cannot delete the other's items");
+                    router.push("/");
+                    return;
+                }
+                setTitle(_item.title);
+                setPrice(_item.price);
+                setImagePath(_item.image);
+                setDescription(_item.description);
+                setCreator(_item.email);
+                judgeYours(_item.email === localStorage.getItem("email"));
+            })
+            .catch(err => {
+                console.error(err);
+                alert("try again later")
+            })
 
-            if (!itemMessage.item) {
-                alert("item not found (invalid id?)");
-                return;
-            }
-
-            const yoursMessage = await isCurrentUser(itemMessage.item.email);
-            const yours = yoursMessage.result;
-
-            if (!yours) {
-                alert("You cannot delete the other's items");
-                router.push("/");
-                return;
-            }
-
-            setTitle(itemMessage.item.title);
-            setPrice(itemMessage.item.price);
-            setImagePath(itemMessage.item.image);
-            setDescription(itemMessage.item.description);
-            setCreator(itemMessage.item.email);
-
-            judgeYours(itemMessage.item.email === localStorage.getItem("email"));
         };
         hydrate();
-    },[context]); // FIXME re-onsider the dependency ([context] is very doubtful)
+    }, []);
 
-    const handleSubmit = async (e: FormEvent) => { //FIXME remove async!
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
         const confirmed = confirm("are you sure to delete this item?");
@@ -63,33 +71,46 @@ const DeleteItem = (context: RequestContext) => {
             return;
         }
 
-        const isYours = await isCurrentUser(creator); // if needed, it has the reason of the failure (BooleanMessage.message)
-        judgeYours(isYours.result);
-        if (!isYours.result) {
-            alert("You can delete only your items (delete is canceled)");
-            return;
-        }
-
-        fetch(`${getRootURL()}api/item/delete/${(await context.params).id}`, {
-            method: "DELETE",
-            headers: {
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Authorization": "Bearer" + " " + localStorage.getItem("token")
-            },
-            body: JSON.stringify({
-                email: email
-            })
+        isCurrentUser(creator)
+        .then((message: BooleanMessage) => message.result)
+        .then(result => {
+                judgeYours(result);
+                if (!result) {
+                    alert("You can delete only your items (delete is canceled)");
+                    return false;
+                }
+                return true;
         })
-        .then(res => res.json())
-        .then((json: IdMessage) => {
-            console.log(json);
-            alert(json.message);
-            if (!json.id) {
+        .then(OK => {
+            if (!OK) {
                 return;
             }
-            router.push(`/n`);
-            return;
+            
+            return context.params
+            .then(params => params.id)
+            .then(id => {
+                return fetch(`${getRootURL()}api/item/delete/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer" + " " + localStorage.getItem("token")
+                    },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                })
+            })
+            .then(res => res.json())
+            .then((json: IdMessage) => {
+                console.log(json);
+                alert(json.message);
+                if (!json.id) {
+                    return;
+                }
+                router.push(`/`);
+                return;
+            })
         })
         .catch(err => {
             console.error(err);
@@ -111,7 +132,6 @@ const DeleteItem = (context: RequestContext) => {
                     <button className="delete-button">Delete!</button>
                     :<div><button className="disabled-button" disabled>Delete!</button><div className="warning-message">* you cannot delete the item because it's not yours</div></div>
                 } 
-
             </form>
         </>
     );

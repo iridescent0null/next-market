@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { jwtVerify } from "jose";
-import Config from "./app/utlis/config";
+import Config, { getDomain, getRootURL } from "./app/utlis/config";
 
 /** delimiter in header values */
 const delimiter = " ";
@@ -17,12 +17,29 @@ export async function middleware(request: NextRequest) {
         const response = NextResponse.next();
 
         const secretKey = new TextEncoder().encode(Config.next.secretKey);
-        const decodedJwt = await jwtVerify(token, secretKey);
+
+        if (!token || token === "null") {
+            return NextResponse.json({message: "invalid token: "+token}, {status: 401});
+        }
+     
+        const decodedJwt = await jwtVerify(token, secretKey, {
+            issuer: getRootURL(),
+            audience: getRootURL(),
+            algorithms: ["HS256"]
+        });
+        // Note if the token is null, "null" or another problematic value, jwtVerify() just says 'Invalid Compact JWS'...
 
         if (true && decodedJwt.payload.email) { // TODO give it the appropriate condition
-            response.cookies.set("email", decodedJwt.payload.email.toString());
+            // naive cookies are unstable in tests with Playwright, then give it better one
+            response.cookies.set({ 
+                name:"email",
+                value: decodedJwt.payload.email.toString(),
+                domain: getDomain(),
+                httpOnly: false,
+                secure: false,
+                sameSite: "lax"
+            });
         }
-
         return response;
     } catch (err) {
         console.error(err);
@@ -31,10 +48,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher:[ //FIXME use it with inventory!
+    matcher:[
         "/api/item/create",
         "/api/item/update/:path*",
         "/api/item/delete/:path*",
         "/api/cart/:path*",
+        "/api/inventory/:path*",
+        "/api/inventory"
     ]
 };

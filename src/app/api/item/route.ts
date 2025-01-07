@@ -14,6 +14,12 @@ interface ItemsMessage {
  * valid but not found ids are omitted implicitly.
  */
 export async function POST(request: NextRequest) {
+    const requestShadowText = await request.clone().text();
+    if (requestShadowText.length < 1) {
+        console.warn("blank request for item post!");
+        console.log(request);
+        return NextResponse.json({message: "blank request"}, {status: 400});
+    }
     try {
         const ids: readonly string[] = (await request.json()).ids;
         await connectDB();
@@ -26,7 +32,7 @@ export async function POST(request: NextRequest) {
 
         const invalidIds = ids.filter(id => foundItems.filter(item => item._id.toString() === id));
 
-        return NextResponse.json({message: "success", items: foundItems, notFound:invalidIds} as ItemsMessage);
+        return NextResponse.json({message: "success", items: foundItems, notFound: invalidIds} as ItemsMessage);
     } catch (err) {
         console.error(err);
         return new NextResponse("failure", {status: 400});

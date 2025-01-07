@@ -15,10 +15,17 @@ interface IdMessage {
 const imageFolderName = "public/item/";
 
 const parseEmailHeader = (headerValue: string | null) => {
-    const regex  = /(?<=\=).*/;
+    // FIXME lousy trick to handle the webkit cookie values like: 
+    //      email=hoge@example.co.jp; email=hoge@example.co.jp
+    const regex  = /(?<=\=)[^;]*/;
+
     const regexResult = headerValue? headerValue.match(regex) : null;
     if (!regexResult) {
         throw new Error("invalid input as email "+ headerValue);
+    }
+
+    if (regexResult.length > 1) {
+        console.log("problematic cookie: " + headerValue);
     }
 
     return regexResult[0].replace("%40","@");
@@ -45,7 +52,7 @@ export async function POST(request: NextResponse) {
         if (imageSrcItem) {
             try {
                 new Types.ObjectId(imageSrcItem as string);
-            } catch  {
+            } catch {
                 return NextResponse.json({message: "the item is not found: " + imageSrcItem}, {status:400});
             }
             const item = await ItemModel.findById(imageSrcItem) as Item;

@@ -8,11 +8,11 @@ const Login = () => {
 
     const router = useRouter();
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         const email = (document.getElementById("login-email")! as HTMLInputElement).value!;
         const plainPassword = (document.getElementById("login-password")! as HTMLInputElement).value!;
-        const json: LoginResultMessage = await fetch("../api/user/login", {
+        fetch("../api/user/login", {
             method: "POST",
             headers: {
                 "Accept": "application/json",
@@ -24,24 +24,27 @@ const Login = () => {
             })
         })
         .then(res => res.json())
+        .then((json: LoginResultMessage) => {
+            if (!json) {
+                alert("server failure. try again later");
+                return;
+            }
+    
+            if (!json.token || (json.token === "null")) {
+                alert("failed to sign in");
+                return;
+            }
+
+            localStorage.setItem("token", json.token);
+            localStorage.setItem("email", email);
+            alert("signed in successfully");
+        })
+        .then(()=>{
+            router.push(`/`);
+        })
         .catch(err => {
             console.log(err);
         });
-
-        if (!json) {
-            alert("server failure. try again later");
-            return;
-        }
-
-        if (!json.token) {
-            alert("failed to sign in");
-            return;
-        }
-
-        localStorage.setItem("token", json.token);
-        localStorage.setItem("email", email);
-        alert("signed in successfully");
-        router.push(`/`);
     }
 
     return (
